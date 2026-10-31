@@ -20,27 +20,37 @@ window.__SITE = {
 };
 
 // Show the plain-link fallback if the iPod module never starts.
+// This runs from <head>, so the elements do not exist yet — look them up lazily.
 (function () {
-  var settled = false;
+  var timer;
 
-  function fail() {
-    if (settled) return;
-    settled = true;
-    var stage = document.getElementById("stage");
-    var fallback = document.getElementById("fallback");
+  function el(id) {
+    return document.getElementById(id);
+  }
+
+  function showFallback() {
+    clearTimeout(timer);
+    var stage = el("stage"), fallback = el("fallback");
     if (stage) stage.hidden = true;
     if (fallback) fallback.hidden = false;
   }
 
+  function showStage() {
+    clearTimeout(timer);
+    var stage = el("stage"), fallback = el("fallback");
+    if (stage) stage.hidden = false;
+    if (fallback) fallback.hidden = true;
+  }
+
   window.addEventListener("error", function (e) {
-    if (e.target && e.target.tagName === "SCRIPT") fail();
+    if (e.target && e.target.tagName === "SCRIPT") showFallback();
   }, true);
 
-  if (window.__ipodFailed) fail();
-  else if (!window.customElements) fail();
-  else customElements.whenDefined("web-music-ipod").then(function () {
-    settled = true;
-  }, fail);
+  if (!window.customElements) {
+    showFallback();
+    return;
+  }
 
-  setTimeout(fail, 6000);
+  customElements.whenDefined("web-music-ipod").then(showStage, showFallback);
+  timer = setTimeout(showFallback, 6000);
 })();

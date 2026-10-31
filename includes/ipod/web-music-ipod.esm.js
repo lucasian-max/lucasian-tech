@@ -4361,7 +4361,9 @@ function hl(e) {
   };
 }
 function Ad(e) {
-  const t = (window.__SITE && window.__SITE[e]) || [];
+  const t = ((window.__SITE && window.__SITE[e]) || []).filter(
+    (i) => i && i.title && /^https?:\/\//.test(i.url)
+  );
   return t.length ? t.map((i) => ({ id: "s-" + i.title, title: i.title, action: "link", url: i.url })) : [{ id: "empty", title: "Nothing yet", action: "info", centered: !0 }];
 }
 const gn = {
@@ -5166,7 +5168,7 @@ function Fh(e, t, i) {
     if (b)
       switch (b.action) {
         case "link":
-          try { window.location.href = b.url; } catch (E) {}
+          window.location.href = b.url;
           break;
         case "navigate":
           Ft({
