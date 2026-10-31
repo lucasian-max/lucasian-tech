@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>D</title>
+<style>
+  :root{
+    --text:rgba(255,255,255,.92);
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#0c0c0e;color:var(--text);font-family:var(--font);
+       -webkit-font-smoothing:antialiased;padding:26px 18px 60px}
+  .wrap{max-width:1560px;margin:0 auto}
+  .head{margin:0 0 22px}
+  .head h1{margin:0 0 5px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+  .head p{margin:0;font-size:12px;line-height:1.55;color:rgba(255,255,255,.44);max-width:900px}
+
+  .card{border:1px solid rgba(255,255,255,.09);border-radius:11px;overflow:hidden;background:#0a0a0b;margin-bottom:16px}
+  .cap{display:flex;align-items:baseline;gap:9px;padding:9px 13px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .cap .k{font:9px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#0a0a0b;
+          background:rgba(255,255,255,.78);border-radius:3px;padding:3px 5px}
+  .cap b{font-size:11.5px;font-weight:600}
+  .cap i{font-style:normal;font-size:10.5px;color:rgba(255,255,255,.38);margin-left:auto}
+
+  /* real 1440x900 viewport, scaled down only for layout inside this page */
+  .frame{position:relative;width:1440px;height:900px;transform-origin:top left;overflow:hidden}
+  .slot{position:relative;overflow:hidden;height:450px}
+  .scale5{transform:scale(.5)}
+
+  /* ============ the device at true 415x692 ============ */
+  .ipod{position:absolute;width:415px;height:692px;border-radius:38px;
+    background:linear-gradient(42deg,rgba(232,232,232,.96) 0,rgba(212,212,212,.96) 25%,#fefefe 50%,rgba(212,212,212,.9) 75%,#fefefe 100%);
+    box-shadow:0 0 0 1px rgba(0,0,0,.45),0 40px 90px -28px rgba(0,0,0,.92)}
+  .ipod .screen{position:relative;margin:30px auto 0;width:273px;height:223px;
+    background-image:linear-gradient(135deg,#a5a59b,#d6d5d0);border-radius:10px;
+    border:8px solid rgba(0,0,0,.5);box-shadow:inset 0 0 10px 2px #4d4d4d;overflow:hidden}
+  .ipod .scr-in{position:absolute;inset:0;background:linear-gradient(180deg,#cfdae6,#dde7f1)}
+  .ipod .tbar{height:20px;display:flex;align-items:center;justify-content:center;position:relative;
+    background:linear-gradient(180deg,#f2f6fa,#c8d5e1);border-bottom:1px solid rgba(0,0,0,.2);
+    font:600 11px/1 var(--font);color:#2b3239}
+  .ipod .tbar::after{content:"";position:absolute;right:8px;top:6px;width:22px;height:8px;
+    background:repeating-linear-gradient(90deg,#5c646c 0 2px,transparent 2px 4px);opacity:.6}
+  .ipod .rows{padding-top:2px}
+  .ipod .row{height:23px;display:flex;align-items:center;padding:0 8px;gap:6px;
+    font:500 13px/1 var(--font);color:#1b2229;letter-spacing:-.01em}
+  .ipod .row.sel{background:linear-gradient(180deg,#7398c1,#5c84b3);color:#fff}
+  .ipod .row .chev{margin-left:auto;font-size:12px;opacity:.42}
+  .ipod .row.sel .chev{opacity:.8}
+  .ipod .wheel{position:absolute;left:50%;transform:translateX(-50%);top:377px;width:270px;height:270px;
+    border-radius:50%;
+    background:radial-gradient(circle at 50% 30%,#fbfafa,#ecebeb 52%,#dedcdc 78%,#e8e7e7);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.9),inset 0 -2px 5px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.12)}
+  .ipod .wheel::after{content:"";position:absolute;left:50%;top:50%;width:94px;height:94px;
+    transform:translate(-50%,-50%);border-radius:50%;
+    background:radial-gradient(circle at 50% 30%,#fff,#f3f2f2 62%,#e7e5e5);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.95),0 1px 3px rgba(0,0,0,.12)}
+  .ipod .wl{position:absolute;font:500 9px/1 var(--font);color:#8b8d90;
+    letter-spacing:.14em;text-transform:uppercase}
+  .ipod .wl.menu{top:14px;left:50%;transform:translateX(-50%)}
+  .ipod .wl.pp{bottom:11px;left:50%;transform:translateX(-50%);letter-spacing:0}
+  .ipod .wl.l{top:50%;left:15px;transform:translateY(-50%);letter-spacing:0}
+  .ipod .wl.r{top:50%;right:15px;transform:translateY(-50%);letter-spacing:0}
+
+  /* shared peripheral type */
+  .k9{font:9px/1 var(--font);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.38)}
+  .k9b{font:600 9px/1 var(--font);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+  .mm{font:9.5px/1.4 var(--mono);letter-spacing:.07em;color:rgba(255,255,255,.40)}
+  .dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:#63c47a;margin-right:5px;vertical-align:1px}
+  .vig{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(118% 88% at 50% 44%,transparent 42%,rgba(0,0,0,.6) 100%)}
+
+  /* ---- A desk ---- */
+  .a{background:#050505}
+  .a .lamp{position:absolute;inset:0;background:radial-gradient(760px 500px at 50% 2%,rgba(255,238,206,.12),rgba(255,238,206,.032) 46%,transparent 72%)}
+  .a .desk{position:absolute;left:0;right:0;bottom:0;height:210px;
+    background:linear-gradient(180deg,#100d0a 0%,#0a0807 36%,#060505 100%)}
+  .a .desk::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,236,205,.17) 28%,rgba(255,236,205,.22) 50%,rgba(255,236,205,.17) 72%,transparent)}
+  .a .contact{position:absolute;left:50%;transform:translateX(-50%);bottom:198px;
+    width:540px;height:58px;border-radius:50%;filter:blur(8px);
+    background:radial-gradient(ellipse,rgba(0,0,0,.94),rgba(0,0,0,.44) 52%,transparent 76%)}
+  .a .refl{position:absolute;left:50%;transform:translateX(-50%) scaleY(-1) translateY(-692px);
+    opacity:.09;filter:blur(1.4px);
+    -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.9),transparent 60%);
+    mask-image:linear-gradient(180deg,rgba(0,0,0,.9),transparent 60%)}
+  .a .tl{position:absolute;right:120px;top:54px;display:flex;gap:24px}
+  .a .bl{position:absolute;left:120px;bottom:56px;display:flex;align-items:center;gap:11px}
+  .a .bl .nm{font:600 10px/1 var(--font);letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+  .a .bl .sep{width:1px;height:10px;background:rgba(255,255,255,.16)}
+  .a .bl .sb{font:9.5px/1 var(--font);letter-spacing:.1em;color:rgba(255,255,255,.26)}
+  .a .br{position:absolute;right:120px;bottom:56px;display:flex;gap:18px;align-items:center}
+
+  /* ---- B room ---- */
+  .b{background:#07090b}
+  .b .wall{position:absolute;inset:0;background:linear-gradient(168deg,#12171c 0%,#0c1014 38%,#080b0e 72%,#050607 100%)}
+  .b .win{position:absolute;left:92px;top:98px;width:344px;height:398px;border-radius:4px;overflow:hidden;
+    background:linear-gradient(184deg,#1d2830,#101820 58%,#0a1014);
+    box-shadow:0 0 0 1px rgba(255,255,255,.06),0 30px 70px -18px rgba(0,0,0,.9)}
+  .b .win .rain{position:absolute;inset:-20%;
+    background-image:
+      repeating-linear-gradient(96deg,rgba(180,210,235,.17) 0 1px,transparent 1px 26px),
+      repeating-linear-gradient(99deg,rgba(180,210,235,.10) 0 1px,transparent 1px 41px),
+      repeating-linear-gradient(93deg,rgba(180,210,235,.07) 0 1px,transparent 1px 63px);
+    filter:blur(.4px)}
+  .b .win .gl{position:absolute;inset:0;background:radial-gradient(92% 62% at 20% 8%,rgba(150,190,225,.13),transparent 68%)}
+  .b .win .m1{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.06)}
+  .b .win .m2{position:absolute;left:0;right:0;top:52%;height:1px;background:rgba(255,255,255,.055)}
+  .b .lamp{position:absolute;right:40px;top:-160px;width:820px;height:820px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,222,170,.14),rgba(255,222,170,.035) 44%,transparent 70%)}
+  .b .bulb{position:absolute;right:408px;top:152px;width:62px;height:62px;border-radius:50%;filter:blur(2px);
+    background:radial-gradient(circle,rgba(255,234,196,.6),rgba(255,220,170,.13) 46%,transparent 72%)}
+  .b .art{position:absolute;right:240px;top:150px;display:flex;gap:17px}
+  .b .art i{display:block;width:76px;height:100px;border:1px solid rgba(255,255,255,.10);
+    background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.012))}
+  .b .art i:nth-child(2){width:60px;height:80px;margin-top:15px}
+  .b .desk{position:absolute;left:0;right:0;bottom:0;height:218px;
+    background:linear-gradient(180deg,#141009 0%,#0d0a07 40%,#070605 100%)}
+  .b .desk::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,226,182,.24) 24%,rgba(255,226,182,.30) 62%,transparent)}
+  .b .contact{position:absolute;left:50%;transform:translateX(-50%);bottom:204px;
+    width:560px;height:62px;border-radius:50%;filter:blur(9px);
+    background:radial-gradient(ellipse,rgba(0,0,0,.95),rgba(0,0,0,.44) 52%,transparent 76%)}
+  .b .refl{position:absolute;left:50%;transform:translateX(-50%) scaleY(-1) translateY(-692px);
+    opacity:.10;filter:blur(1.6px);
+    -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.85),transparent 56%);
+    mask-image:linear-gradient(180deg,rgba(0,0,0,.85),transparent 56%)}
+  .b .nav{position:absolute;left:120px;top:54px;display:flex;gap:28px}
+  .b .nav span{font:9px/1 var(--font);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.30)}
+  .b .nav span.on{color:rgba(255,255,255,.68)}
+  .b .ft{position:absolute;left:120px;right:120px;bottom:54px;display:flex;align-items:center}
+  .b .ft .r{margin-left:auto;display:flex;gap:20px;align-items:center}
+
+  /* ---- C press kit ---- */
+  .c{background:#000}
+  .c .glow{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);
+    width:940px;height:860px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.06),transparent 62%)}
+  .c .rt{position:absolute;left:92px;right:92px;top:62px;height:1px;background:rgba(255,255,255,.11)}
+  .c .rb{position:absolute;left:92px;right:92px;bottom:62px;height:1px;background:rgba(255,255,255,.11)}
+  .c .vl{position:absolute;top:62px;bottom:62px;width:1px;background:rgba(255,255,255,.075)}
+  .c .vl.l{left:92px}
+  .c .vl.r{right:92px}
+  .c .hl{position:absolute;left:92px;top:33px;display:flex;gap:13px;align-items:baseline}
+  .c .hr{position:absolute;right:92px;top:33px}
+  .c .ft{position:absolute;left:92px;right:92px;bottom:32px;display:flex;gap:70px}
+  .c .ft .k{font:8.5px/1 var(--font);letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.30)}
+  .c .ft .v{font:10px/1 var(--mono);letter-spacing:.05em;color:rgba(255,255,255,.54);margin-top:6px;display:block}
+  .c .ix{position:absolute;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px}
+  .c .ix.l{left:114px}
+  .c .ix.r{right:114px;align-items:flex-end}
+  .c .ix span{font:8.5px/1 var(--mono);letter-spacing:.15em;color:rgba(255,255,255,.30)}
+  .c .ix span.on{color:rgba(255,255,255,.66)}
+
+  /* ---- D hud ---- */
+  .d{background:#060607}
+  .d .grid{position:absolute;inset:0;
+    background-image:
+      repeating-linear-gradient(0deg,rgba(255,255,255,.028) 0 1px,transparent 1px 40px),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.028) 0 1px,transparent 1px 40px)}
+  .d .fade{position:absolute;inset:0;background:radial-gradient(104% 76% at 50% 46%,transparent 34%,rgba(0,0,0,.84) 100%)}
+  .d .glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:580px;height:840px;border-radius:50%;
+    background:radial-gradient(circle,rgba(120,170,255,.11),transparent 66%)}
+  .d .tb{position:absolute;left:0;right:0;top:0;height:38px;display:flex;align-items:center;gap:26px;padding:0 38px;
+    border-bottom:1px solid rgba(255,255,255,.085);background:linear-gradient(180deg,rgba(255,255,255,.035),transparent)}
+  .d .bb{position:absolute;left:0;right:0;bottom:0;height:38px;display:flex;align-items:center;gap:26px;padding:0 38px;
+    border-top:1px solid rgba(255,255,255,.085);background:linear-gradient(0deg,rgba(255,255,255,.03),transparent)}
+  .d .sp{margin-left:auto}
+  .d .brk{position:absolute;width:17px;height:17px;border:1px solid rgba(255,255,255,.20)}
+  .d .brk.tl{left:24px;top:54px;border-right:0;border-bottom:0}
+  .d .brk.tr{right:24px;top:54px;border-left:0;border-bottom:0}
+  .d .brk.bl{left:24px;bottom:54px;border-right:0;border-top:0}
+  .d .brk.br{right:24px;bottom:54px;border-left:0;border-top:0}
+  .d .scan{position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px)}
+
+  /* ---- mobile ---- */
+  .mob{display:flex;gap:18px;flex-wrap:wrap}
+  .mcard{border:1px solid rgba(255,255,255,.09);border-radius:11px;overflow:hidden;background:#0a0a0b}
+  .mcard .cap{white-space:nowrap}
+  .mslot{position:relative;overflow:hidden;width:390px;height:844px}
+  .m390{position:relative;width:390px;height:844px;overflow:hidden}
+  .m-a{background:#050505}
+  .m-a .lamp{position:absolute;inset:0;background:radial-gradient(430px 300px at 50% 1%,rgba(255,238,206,.13),transparent 70%)}
+  .m-a .brand{position:absolute;left:0;right:0;top:64px;text-align:center;
+    font:600 9.5px/1 var(--font);letter-spacing:.34em;text-transform:uppercase;color:rgba(255,255,255,.36)}
+  .m-a .desk{position:absolute;left:0;right:0;bottom:0;height:152px;background:linear-gradient(180deg,#100d0a,#060505)}
+  .m-a .desk::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,236,205,.19),transparent)}
+  .m-a .contact{position:absolute;left:50%;transform:translateX(-50%);bottom:142px;width:340px;height:46px;
+    border-radius:50%;filter:blur(7px);background:radial-gradient(ellipse,rgba(0,0,0,.94),transparent 74%)}
+  .m-a .refl{position:absolute;left:50%;transform:translateX(-50%) scaleY(-1) translateY(-692px);opacity:.09;
+    -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.85),transparent 54%);
+    mask-image:linear-gradient(180deg,rgba(0,0,0,.85),transparent 54%)}
+  .m-a .hint{position:absolute;left:0;right:0;bottom:98px;text-align:center;
+    font:9px/1 var(--font);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.24)}
+  .m-d{background:#060607}
+  .m-d .grid{position:absolute;inset:0;background-image:
+      repeating-linear-gradient(0deg,rgba(255,255,255,.026) 0 1px,transparent 1px 32px),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.026) 0 1px,transparent 1px 32px)}
+  .m-d .fade{position:absolute;inset:0;background:radial-gradient(100% 68% at 50% 44%,transparent 32%,rgba(0,0,0,.86))}
+  .m-d .glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:430px;height:830px;
+    border-radius:50%;background:radial-gradient(circle,rgba(120,170,255,.11),transparent 68%)}
+  .m-d .tb{position:absolute;left:0;right:0;top:0;height:46px;display:flex;align-items:center;padding:0 18px;
+    border-bottom:1px solid rgba(255,255,255,.085)}
+  .m-d .bb{position:absolute;left:0;right:0;bottom:0;height:46px;display:flex;align-items:center;padding:0 18px;
+    border-top:1px solid rgba(255,255,255,.085)}
+  .m-d .sp{margin-left:auto}
+
+  body{padding:14px 16px 20px}
+  .wrap{max-width:1520px}
+  .head{display:none}
+</style></head><body><div class="wrap">
+<div class="card">
+  <div class="cap"><span class="k">D</span><b>HUD</b><i>device as rack gear · monospace · status rails</i></div>
+  <div class="slot" style="height:452px">
+    <div class="frame d scale5">
+      <div class="grid"></div><div class="glow"></div><div class="fade"></div>
+      <div class="tb">
+        <span class="mm"><span class="dot"></span>ONLINE</span>
+        <span class="mm">APPS 04</span><span class="mm">PROJECTS 04</span>
+        <span class="mm sp">lucasian.tech</span><span class="mm">12:04:22</span>
+      </div>
+      <div class="brk tl"></div><div class="brk tr"></div><div class="brk bl"></div><div class="brk br"></div>
+      <div class="ipod" style="left:512px;top:104px" id="ipD"></div>
+      <div class="bb">
+        <span class="mm">LAST BUILD 04e5255c</span><span class="mm">MEDIA 1029 TRACKS</span>
+        <span class="mm sp">↑↓ SELECT · ⏎ OPEN · ⌫ BACK</span>
+      </div>
+      <div class="scan"></div>
+    </div>
+  </div>
+</div>
+
+<div class="head" style="margin:30px 0 16px">
+  <h1>Mobile — 390×844, real size</h1>
+  <p>You said this matters most. The device fills the width; whatever else survives has to earn its 40px.</p>
+</div>
+
+<div class="mob">
+  <div class="mcard">
+    <div class="cap"><span class="k">A</span><b>Desk</b><i>brand above, hint below</i></div>
+    <div class="mslot">
+      <div class="m390 m-a">
+        <div class="lamp"></div><div class="brand">lucasian</div>
+        <div class="desk"></div><div class="contact"></div>
+        <div class="refl" id="reflM1"></div>
+        <div id="ipM1" class="ipod" style="left:-13px;top:74px"></div>
+        <div class="hint">tap a row</div>
+      </div>
+    </div>
+  </div>
+  <div class="mcard">
+    <div class="cap"><span class="k">D</span><b>HUD</b><i>two 46px rails, nothing wasted</i></div>
+    <div class="mslot">
+      <div class="m390 m-d">
+        <div class="grid"></div><div class="glow"></div><div class="fade"></div>
+        <div class="tb"><span class="mm"><span class="dot"></span>ONLINE</span><span class="mm sp">12:04</span></div>
+        <div id="ipM2" class="ipod" style="left:-13px;top:74px"></div>
+        <div class="bb"><span class="mm">APPS 04</span><span class="mm sp">TAP A ROW</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="head" style="margin:26px 0 0">
+  <p style="font-size:11.5px;color:rgba(255,255,255,.36);line-height:1.6">
+    Rows read <b style="color:rgba(255,255,255,.6);font-weight:600">Self-Hosted · Projects · Now · About</b>.
+    “Now” is a placeholder for the fourth slot — that's still yours to pick.
+  </p>
+</div>
+
+</div>
+
+<script>
+  // one device renderer, injected everywhere, so every frame shows identical hardware
+  const ROWS = ["Self-Hosted", "Projects", "Now", "About"];
+  function device(sel) {
+    return `<div class="screen"><div class="scr-in">
+      <div class="tbar">iPod</div>
+      <div class="rows">${ROWS.map((r, i) => `<div class="row${i === 0 ? " sel" : ""}">${r}<span class="chev">›</span></div>`).join("")}</div>
+    </div></div>
+    <div class="wheel">
+      <span class="wl menu">menu</span><span class="wl l">◀◀</span><span class="wl r">▶▶</span><span class="wl pp">▶‖</span>
+    </div>`;
+  }
+  for (const id of ["ipA", "ipB", "ipC", "ipD", "ipM1", "ipM2"]) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = device();
+  }
+  // reflections mirror the same device
+  for (const id of ["reflA", "reflB", "reflM1"]) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div class="ipod">${device()}</div>`;
+  }
+</script>
+
+</div><script>
+  // one device renderer, injected everywhere, so every frame shows identical hardware
+  const ROWS = ["Self-Hosted", "Projects", "Now", "About"];
+  function device(sel) {
+    return `<div class="screen"><div class="scr-in">
+      <div class="tbar">iPod</div>
+      <div class="rows">${ROWS.map((r, i) => `<div class="row${i === 0 ? " sel" : ""}">${r}<span class="chev">›</span></div>`).join("")}</div>
+    </div></div>
+    <div class="wheel">
+      <span class="wl menu">menu</span><span class="wl l">◀◀</span><span class="wl r">▶▶</span><span class="wl pp">▶‖</span>
+    </div>`;
+  }
+  for (const id of ["ipA", "ipB", "ipC", "ipD", "ipM1", "ipM2"]) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = device();
+  }
+  // reflections mirror the same device
+  for (const id of ["reflA", "reflB", "reflM1"]) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div class="ipod">${device()}</div>`;
+  }
+</script></body></html>
