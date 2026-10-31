@@ -48,8 +48,12 @@ body {
   display: none;
 }
 
+/* The host must be as wide as the device, not shrink-to-fit. At width 0 the
+   component's own `@container ipod (width < 360px)` rule sets --ipod-scale to
+   0.75, so it renders small and then "zooms" once the viewport settles. */
 #stage web-music-ipod {
   display: block;
+  width: 440px;
   min-height: 692px;
   transform-origin: center;
 }
