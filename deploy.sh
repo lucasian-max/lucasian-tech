@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 DIST=$(mktemp -d)
 V=$(cat app.js styles.css includes/ipod/web-music-ipod.esm.js | shasum -a 256 | cut -c1-8)
 
-cp -R index.html styles.css app.js assets includes _headers "$DIST/"
+cp -R index.html 404.html styles.css app.js assets includes _headers "$DIST/"
 # rewrite every ?v=... in the shell to the current stamp
 sed -i '' "s/?v=[A-Za-z0-9]*/?v=$V/g" "$DIST/index.html"
 
