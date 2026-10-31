@@ -1,14 +1,5 @@
-# Pages caches assets for 4h by default, which pinned the broken app.js in
-# visitors' browsers. Always revalidate so a deploy is visible immediately.
 /*
   Cache-Control: public, max-age=0, must-revalidate
 
-# Fingerprinted-free bundles never change between deploys; let them sit.
-/includes/ipod/web-music-ipod.esm.js
-  Cache-Control: public, max-age=3600, must-revalidate
-
 /assets/fonts/*
   Cache-Control: public, max-age=31536000, immutable
-
-/assets/og.png
-  Cache-Control: public, max-age=3600
