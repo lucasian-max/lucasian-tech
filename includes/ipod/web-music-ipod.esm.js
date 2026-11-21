@@ -1000,7 +1000,7 @@ const Ql = { storefront: "us", language: "en-US" }, Ga = "apple-ipod:settings", 
 var xa;
 const Je = typeof window > "u" || (xa = window.matchMedia) == null ? void 0 : xa.call(window, "(prefers-color-scheme: dark)");
 function tl() {
-  return Je != null && Je.matches ? de.ALWAYS_ON : de.OFF;
+  return de.ALWAYS_ON;
 }
 const Pe = Object.freeze({
   shuffle: Li.OFF,
@@ -4240,19 +4240,10 @@ function ol(e, t, i) {
 }
 function Sh({ i18n: e }) {
   return [
-    Ee("music", e),
+    { id: "music", title: e.t("Portfolio.Music"), action: "navigate", target: "songs" },
     Ee("projects", e),
     Ee("about", e),
     Ee("contacts", e)
-  ];
-}
-function MusicHub({ i18n: e, hasNowPlaying: t }) {
-  return [
-    ...t ? [Ee("now-playing", e)] : [],
-    Ee("playlists", e),
-    Ee("songs", e),
-    Ee("artists", e),
-    Ee("settings", e)
   ];
 }
 function xh({ i18n: e }) {
@@ -4431,12 +4422,6 @@ const gn = {
     items: Sh,
     listsNowPlaying: !1
   },
-  music: {
-    view: "list",
-    titleKey: "Portfolio.Music",
-    items: MusicHub,
-    listsNowPlaying: !0
-  },
   settings: {
     view: "list",
     titleKey: "ASE.Web.IPod.Menu.Settings",
@@ -4471,7 +4456,7 @@ const gn = {
   },
   songs: {
     view: "list",
-    titleKey: "ASE.Web.IPod.Menu.Songs",
+    titleKey: "Portfolio.Music",
     items: hl("songs")
   },
   "playlist-tracks": {
@@ -5314,12 +5299,10 @@ function Fh(e, t, i) {
       contextId: b.contextId
     }), k.play(Z), Ft(rl()), !0);
   }
-  function startDefaultAmbient(openNP) {
+  function startDefaultSongs(openNP) {
     if (!z || !z.songs || !z.songs.length) return !1;
-    const pl = (z.playlists || []).find((p) => p.id === "pl-ambient");
-    const tracks = pl ? nn("playlist-tracks", pl.id, z) : [...z.songs];
-    if (!tracks.length) return !1;
-    j.setQueueSource(pl ? { key: "playlist-tracks", contextId: pl.id } : { key: "songs" });
+    const tracks = [...z.songs];
+    j.setQueueSource({ key: "songs" });
     k.play(tracks, 0);
     if (openNP && n !== "now-playing") Ft(rl());
     return !0;
@@ -5343,7 +5326,7 @@ function Fh(e, t, i) {
         k.resume();
         return;
       }
-      startDefaultAmbient(!0);
+      startDefaultSongs(!0);
     }
   }
   const Vt = Hi();
@@ -5369,6 +5352,7 @@ function Fh(e, t, i) {
     getSelectedIndex: () => Q,
     getScreenKey: () => a && a.key,
     getStack: () => q.slice(),
+    getFirstSong: () => (z && z.songs && z.songs[0]) || null,
     selectIndex: (idx) => {
       if (idx < 0 || idx >= h.length || !h[idx] || h[idx].action === "info") return !1;
       const changed = idx !== Q;
@@ -5386,9 +5370,10 @@ function Fh(e, t, i) {
     openNowPlaying: () => {
       if (n === "now-playing") return !0;
       if (A.queue.length > 0 || A.hasLoadedItem) { Ft(rl()); return !0; }
-      return startDefaultAmbient(!0);
+      return startDefaultSongs(!0);
     },
-    playAmbient: (openNP = !1) => startDefaultAmbient(openNP),
+    playAmbient: (openNP = !1) => startDefaultSongs(openNP),
+    playDefault: (openNP = !1) => startDefaultSongs(openNP),
     openScreen: (key, contextId) => {
       if (!pe(key)) return !1;
       if (key === "main") {

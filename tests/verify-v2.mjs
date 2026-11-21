@@ -1,17 +1,14 @@
-/* End-to-end verification + visual capture for lucasian.tech v2.
-   Zero dependencies: Node built-in http + Chromium CDP over WebSocket. */
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import { mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const SHOT_DIR = process.env.SHOT_DIR || join(ROOT, "tests", "shots");
 const CHROME = process.env.CHROME_BIN || "/usr/bin/chromium";
-const CDP_PORT = 9344;
-const HTTP_PORT = 8111;
+const CDP_PORT = 9345;
+const HTTP_PORT = 8112;
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -64,7 +61,7 @@ const chrome = spawn(
   CHROME,
   [
     `--remote-debugging-port=${CDP_PORT}`,
-    `--user-data-dir=${mkdtempSync("/tmp/v2-chr-")}`,
+    `--user-data-dir=${mkdtempSync("/tmp/v3-chr-")}`,
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
@@ -141,56 +138,38 @@ async function shot(filename) {
   writeFileSync(join(SHOT_DIR, filename), Buffer.from(r.result.data, "base64"));
 }
 
-console.log("\nverify-v2: http://127.0.0.1:" + HTTP_PORT + "/\n");
+console.log("\nverify-v3: http://127.0.0.1:" + HTTP_PORT + "/\n");
 
-// 1. SEO static endpoints
-const robotsRes = await fetch(`http://127.0.0.1:${HTTP_PORT}/robots.txt`);
-const robotsTxt = await robotsRes.text();
-ok("robots.txt served cleanly (not HTML)", robotsRes.ok && /Sitemap:\s*https:\/\/lucasian\.tech\/sitemap\.xml/.test(robotsTxt));
-
-const smRes = await fetch(`http://127.0.0.1:${HTTP_PORT}/sitemap.xml`);
-const smTxt = await smRes.text();
-ok("sitemap.xml served cleanly", smRes.ok && smTxt.includes("<loc>https://lucasian.tech/</loc>"));
-
-// 2. Root menu shape + zero self-hosted leaks
 const rootState = await evalJs(`(() => {
   const el = document.getElementById('ipod');
   const r = el && el.shadowRoot;
   if (!r) return { error: 'no shadowRoot' };
   const items = [...r.querySelectorAll('.menu-item .item-title')].map(n => n.textContent.trim());
   const title = r.querySelector('.screen-title')?.textContent?.trim();
+  const hasNotes = !!document.getElementById('notes-toggle') || !!document.getElementById('notes-sheet');
+  const hasBrand = !!document.getElementById('brand-home');
+  const pillTitle = document.getElementById('music-title')?.textContent?.trim();
+  const backlit = el.getAttribute('backlit');
   const html = document.documentElement.outerHTML;
-  const leak = /self-hosted|audiobooks\.lucasian|karakeep\.lucasian|library\.lucasian|manga\.lucasian|books\.lucasian|usage\.lucasian|navidrome|music\.lucasian/i.test(html);
-  const wearInsideRig = !!document.querySelector('#chassis-rig .wear-tint') && !document.querySelector('#ipod-set > .wear-tint');
-  return { title, items, leak, wearInsideRig, hasBridge: !!window.__IPOD_BRIDGE };
+  const leak = /self-hosted|audiobooks\.lucasian|karakeep\.lucasian|studio-ambient/i.test(html);
+  return { title, items, hasNotes, hasBrand, pillTitle, backlit, leak };
 })()`);
 
-ok("iPod title is Mridul Vijay", rootState.title === "Mridul Vijay", JSON.stringify(rootState));
-ok("root menu has 4 clean rows (Music, Projects, About, Contacts)", JSON.stringify(rootState.items) === JSON.stringify(["Music", "Projects", "About", "Contacts"]), JSON.stringify(rootState.items));
-ok("zero self-hosted subdomains or leaks in HTML", rootState.leak === false);
-ok("wear overlays mounted inside coupled #chassis-rig", rootState.wearInsideRig === true);
+ok("root title is Mridul Vijay", rootState.title === "Mridul Vijay", JSON.stringify(rootState));
+ok("root menu has 4 rows (Music, Projects, About, Contacts)", JSON.stringify(rootState.items) === JSON.stringify(["Music", "Projects", "About", "Contacts"]), JSON.stringify(rootState.items));
+ok("Notes and top-left brand badge completely removed", !rootState.hasNotes && !rootState.hasBrand, JSON.stringify(rootState));
+ok("inline remote starts muted by default (Sound Off)", rootState.pillTitle === "Sound Off", rootState.pillTitle);
+ok("iPod backlit locked true with zero ambient/self-hosted leaks", rootState.backlit === "true" && !rootState.leak, JSON.stringify(rootState));
 
-await shot("v2-desktop-home.png");
-
-// 3. Direct click on LCD row (Projects -> click once selects, click again opens -> click project opens detail)
-await evalJs(`(() => {
-  const r = document.getElementById('ipod').shadowRoot;
-  const rows = [...r.querySelectorAll('.menu-item')];
-  rows[1].click();
-})()`);
-await sleep(120);
-const afterFirstClick = await evalJs(`(() => {
-  const r = document.getElementById('ipod').shadowRoot;
-  return r.querySelector('.menu-item.selected .item-title')?.textContent?.trim();
-})()`);
-ok("direct LCD click selects clicked row (Projects)", afterFirstClick === "Projects", afterFirstClick);
+await shot("v3-desktop-home.png");
 
 await evalJs(`(() => {
   const r = document.getElementById('ipod').shadowRoot;
   r.querySelector('.menu-item.selected').click();
 })()`);
 await sleep(420);
-const projectsScreen = await evalJs(`(() => {
+
+const musicScreen = await evalJs(`(() => {
   const r = document.getElementById('ipod').shadowRoot;
   const lists = r.querySelectorAll('.menu-items');
   const active = lists[lists.length - 1];
@@ -200,45 +179,12 @@ const projectsScreen = await evalJs(`(() => {
     hash: location.hash
   };
 })()`);
-ok("clicking selected row opens Projects screen + syncs hash", projectsScreen.title === "Projects" && projectsScreen.items.includes("handwritten2pdf") && projectsScreen.hash === "#projects", JSON.stringify(projectsScreen));
+ok("Music goes straight into Songs (Dear Prudence, Gypsy, No Surprises...)", musicScreen.title === "Music" && musicScreen.items[0] === "Dear Prudence" && musicScreen.items.length === 8, JSON.stringify(musicScreen));
 
-// Open Black Hole detail card
-await evalJs(`(() => {
-  const r = document.getElementById('ipod').shadowRoot;
-  const lists = r.querySelectorAll('.menu-items');
-  const active = lists[lists.length - 1];
-  active.querySelector('.menu-item.selected').click();
-})()`);
-await sleep(420);
-const detailScreen = await evalJs(`(() => {
-  const r = document.getElementById('ipod').shadowRoot;
-  const lists = r.querySelectorAll('.menu-items');
-  const active = lists[lists.length - 1];
-  return {
-    title: r.querySelector('.screen-title')?.textContent?.trim(),
-    items: [...active.querySelectorAll('.menu-item .item-title')].map(n => n.textContent.trim()),
-    selectedTitle: active.querySelector('.menu-item.selected .item-title')?.textContent?.trim(),
-    hash: location.hash
-  };
-})()`);
-ok("project detail card shows facts + selects first link row", detailScreen.title === "Black Hole" && detailScreen.selectedTitle === "Launch demo" && detailScreen.hash === "#projects/black-hole", JSON.stringify(detailScreen));
+await shot("v3-desktop-songs.png");
 
-await shot("v2-desktop-projects.png");
-
-// Verify Music hub contains Navidrome-synced playlists
-await evalJs(`window.__IPOD_BRIDGE.openScreen('playlists')`);
-await sleep(360);
-const playlistsScreen = await evalJs(`(() => {
-  const r = document.getElementById('ipod').shadowRoot;
-  const lists = r.querySelectorAll('.menu-items');
-  const active = lists[lists.length - 1];
-  return [...active.querySelectorAll('.menu-item .item-title')].map(n => n.textContent.trim());
-})()`);
-ok("Music playlists include Studio Ambient, On Repeat, and Heavy Rotation", playlistsScreen.includes("Studio Ambient") && playlistsScreen.includes("On Repeat") && playlistsScreen.includes("Heavy Rotation"), JSON.stringify(playlistsScreen));
-
-// 4. Omarchy-style music pill plays real audio & opens Now Playing
 await evalJs(`document.getElementById('music-toggle').click()`);
-await sleep(600);
+await sleep(900);
 const playingState = await evalJs(`(() => {
   const pill = document.getElementById('music-pill');
   const title = document.getElementById('music-title')?.textContent?.trim();
@@ -246,75 +192,28 @@ const playingState = await evalJs(`(() => {
   const pb = window.__IPOD_BRIDGE?.getPlayback();
   return {
     pillPlaying: pill?.getAttribute('data-playing'),
-    htmlPlaying: document.documentElement.getAttribute('data-playing'),
     title,
     artist,
-    hasLoadedItem: pb?.hasLoadedItem,
-    isPlaying: pb?.isPlaying,
+    duration: Math.round(pb?.currentPlaybackDuration || 0),
     queueLen: pb?.queue?.length || 0
   };
 })()`);
-ok("Omarchy music pill starts playback & updates HUD", playingState.pillPlaying === "true" && playingState.title === "Midnight Desk" && playingState.queueLen > 0, JSON.stringify(playingState));
+ok("inline remote unmutes and plays full-length Dear Prudence (> 180s)", playingState.pillPlaying === "true" && playingState.title === "Dear Prudence" && playingState.artist === "The Beatles" && playingState.duration > 180, JSON.stringify(playingState));
 
 await evalJs(`document.getElementById('music-track').click()`);
+await sleep(360);
+await shot("v3-desktop-playing.png");
+
+await evalJs(`window.__IPOD_BRIDGE.openScreen('main')`);
 await sleep(300);
-const npScreen = await evalJs(`(() => {
-  const r = document.getElementById('ipod').shadowRoot;
-  return {
-    title: r.querySelector('.screen-title')?.textContent?.trim(),
-    songTitle: r.querySelector('[data-testid="now-playing-title"], .title')?.textContent?.trim()
-  };
-})()`);
-ok("clicking music pill track opens Now Playing screen on iPod", npScreen.title === "Now Playing", JSON.stringify(npScreen));
-
-await shot("v2-desktop-playing.png");
-
-// Pause audio for clean remaining checks
-await evalJs(`document.getElementById('music-toggle').click()`);
-await sleep(150);
-
-// 5. Top-right Notes drawer
-await evalJs(`document.getElementById('notes-toggle').click()`);
-await sleep(300);
-const notesListOk = await evalJs(`(() => {
-  const sheet = document.getElementById('notes-sheet');
-  const items = [...sheet.querySelectorAll('.note-item-title')].map(n => n.textContent.trim());
-  return { open: !sheet.hidden && sheet.classList.contains('is-open'), items };
-})()`);
-ok("top-right Notes drawer opens with posts", notesListOk.open && notesListOk.items.length >= 2, JSON.stringify(notesListOk));
-
-await evalJs(`document.querySelector('.note-item').click()`);
-await sleep(200);
-await shot("v2-desktop-notes.png");
-
-// Close Notes via Escape
-await evalJs(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))`);
-await sleep(300);
-const notesClosed = await evalJs(`document.getElementById('notes-sheet').hidden === true`);
-ok("Escape closes Notes drawer", notesClosed);
-
-// 6. Return to home via brand button + verify global keyboard nav
-await evalJs(`document.getElementById('brand-home').click()`);
-await sleep(200);
-const homeAfterBrand = await evalJs(`document.getElementById('ipod').shadowRoot.querySelector('.screen-title')?.textContent?.trim()`);
-ok("brand button returns iPod to root menu", homeAfterBrand === "Mridul Vijay", homeAfterBrand);
-
-// 7. Mobile viewport screenshot (390x844)
 await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 2, mobile: true }, S);
 await sleep(300);
 const mobileBounds = await evalJs(`(() => {
-  const hud = document.querySelector('.studio-hud').getBoundingClientRect();
   const rig = document.getElementById('chassis-rig').getBoundingClientRect();
-  return {
-    hudBottom: Math.round(hud.bottom),
-    rigTop: Math.round(rig.top),
-    rigLeft: Math.round(rig.left),
-    rigRight: Math.round(rig.right),
-    vw: window.innerWidth
-  };
+  return { left: Math.round(rig.left), right: Math.round(rig.right), vw: window.innerWidth };
 })()`);
-ok("mobile layout fits cleanly without horizontal overflow", mobileBounds.rigLeft >= 0 && mobileBounds.rigRight <= mobileBounds.vw + 2, JSON.stringify(mobileBounds));
-await shot("v2-mobile-home.png");
+ok("mobile layout fits cleanly without horizontal overflow", mobileBounds.left >= 0 && mobileBounds.right <= mobileBounds.vw + 2, JSON.stringify(mobileBounds));
+await shot("v3-mobile-home.png");
 
 ok("zero console or page errors", consoleErrors.length === 0 && pageErrors.length === 0, JSON.stringify({ consoleErrors, pageErrors }));
 

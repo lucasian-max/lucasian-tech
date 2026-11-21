@@ -1,4 +1,3 @@
-# lucasian.tech — public portfolio
 User-agent: *
 Allow: /
 

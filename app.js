@@ -1,5 +1,3 @@
-/* Site data, iPod interaction bridge, studio HUD, coupled 3D tilt, and Notes drawer. */
-
 window.__SITE = {
   projects: [
     {
@@ -81,7 +79,6 @@ window.__SITE = {
   ]
 };
 
-/* ---------------- loader guard ---------------- */
 (function () {
   var ready = false;
   var backstop;
@@ -121,7 +118,6 @@ window.__SITE = {
   backstop = setTimeout(showLinks, 5000);
 })();
 
-/* ---------------- iPod shadow wiring: direct LCD clicks, wheel, backlight ---------------- */
 (function () {
   function start() {
     var host = document.getElementById("ipod");
@@ -164,7 +160,6 @@ window.__SITE = {
       ].join("\n");
       root.appendChild(fix);
 
-      /* keep keyboard Tab focused directly on the LCD list */
       var clearStops = function () {
         root.querySelectorAll(".wheel-button, .select-button").forEach(function (b) {
           if (b.getAttribute("tabindex") !== "-1") b.setAttribute("tabindex", "-1");
@@ -178,7 +173,6 @@ window.__SITE = {
         attributeFilter: ["tabindex"]
       });
 
-      /* direct click / tap on LCD menu rows: click selects, clicking selected opens */
       root.addEventListener("click", function (e) {
         var target = e.target;
         if (!target || !target.closest) return;
@@ -212,7 +206,11 @@ window.__SITE = {
       root.addEventListener("dblclick", function (e) {
         var item = e.target && e.target.closest ? e.target.closest(".menu-item") : null;
         if (!item || item.getAttribute("data-action") === "info") return;
-        var items = Array.prototype.slice.call(item.parentElement.querySelectorAll(".menu-item"));
+        var list = item.parentElement;
+        if (!list) return;
+        var lists = root.querySelectorAll(".menu-items");
+        if (lists.length > 1 && lists[lists.length - 1] !== list) return;
+        var items = Array.prototype.slice.call(list.querySelectorAll(".menu-item"));
         var idx = items.indexOf(item);
         if (idx >= 0 && window.__IPOD_BRIDGE) {
           quietHint();
@@ -220,7 +218,6 @@ window.__SITE = {
         }
       });
 
-      /* tap ring quadrants cleanly on touch or mouse click */
       var startPt = null;
       var moved = false;
 
@@ -261,7 +258,6 @@ window.__SITE = {
         }
       }, true);
 
-      /* mouse wheel / trackpad scrolls the iPod wheel one notch per row */
       var WHEEL_DEG = 15;
       var PIXELS_PER_ROW = 90;
       var acc = 0, lastDir = 0;
@@ -298,49 +294,11 @@ window.__SITE = {
       }
     }
 
-    function setupBacklight(root) {
-      if (!root) return;
-      var screen = root.querySelector(".screen-body");
-      var wheel = root.querySelector(".scroll-wheel");
-      if (!screen) return;
-
-      var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (!reduce) {
-        screen.animate(
-          [{ filter: "brightness(.42)" }, { filter: "brightness(1)" }],
-          { duration: 280, easing: "ease-out", fill: "backwards" }
-        );
-      }
-
-      var idle = null;
-      var setIdle = function (isIdle) {
-        screen.style.filter = isIdle ? "brightness(.66)" : "brightness(1)";
-        document.documentElement.setAttribute("data-idle", isIdle ? "true" : "false");
-      };
-      var resetIdle = function () {
-        if (idle) clearTimeout(idle);
-        setIdle(false);
-        idle = setTimeout(function () { setIdle(true); }, 15000);
-      };
-
-      screen.style.transition = "filter 900ms ease-in-out";
-      ["pointerdown", "keydown", "wheel"].forEach(function (ev) {
-        document.addEventListener(ev, resetIdle, { passive: true });
-      });
-      if (wheel) {
-        ["wheelscroll", "wheeldragstart"].forEach(function (ev) {
-          wheel.addEventListener(ev, resetIdle, { passive: true });
-        });
-      }
-      resetIdle();
-    }
-
     var tries = 0;
     var timer = setInterval(function () {
       if (host.shadowRoot && host.shadowRoot.querySelector(".scroll-wheel")) {
         clearInterval(timer);
         wire();
-        setupBacklight(host.shadowRoot);
         restoreHashRoute();
       } else if (++tries > 200) {
         clearInterval(timer);
@@ -363,7 +321,9 @@ window.__SITE = {
     var ctx = parts[1];
     if (key === "projects" && ctx) {
       window.__IPOD_BRIDGE.openScreen("project-detail", ctx);
-    } else if (["music", "projects", "about", "contacts", "playlists", "songs", "artists", "brick"].indexOf(key) >= 0) {
+    } else if (key === "music") {
+      window.__IPOD_BRIDGE.openScreen("songs");
+    } else if (["songs", "projects", "about", "contacts", "brick"].indexOf(key) >= 0) {
       window.__IPOD_BRIDGE.openScreen(key);
     }
   }
@@ -372,9 +332,13 @@ window.__SITE = {
     var d = e.detail || {};
     var next = "";
     if (d.key && d.key !== "main") {
-      next = d.key === "project-detail" && d.contextId
-        ? "#projects/" + encodeURIComponent(d.contextId)
-        : "#" + encodeURIComponent(d.key);
+      if (d.key === "project-detail" && d.contextId) {
+        next = "#projects/" + encodeURIComponent(d.contextId);
+      } else if (d.key === "songs") {
+        next = "#music";
+      } else {
+        next = "#" + encodeURIComponent(d.key);
+      }
     }
     try {
       if (location.hash !== next) {
@@ -384,7 +348,6 @@ window.__SITE = {
   });
 })();
 
-/* ---------------- coupled 3D tilt + specular sheen + handling wear ---------------- */
 (function () {
   function mountWear(rig) {
     if (!rig || rig.querySelector(".wear")) return;
@@ -484,10 +447,8 @@ window.__SITE = {
   else wireTilt();
 })();
 
-/* ---------------- studio HUD: Omarchy music pill, global keys, Notes drawer ---------------- */
 (function () {
   function initHud() {
-    var brandHome = document.getElementById("brand-home");
     var pill = document.getElementById("music-pill");
     var btnToggle = document.getElementById("music-toggle");
     var btnTrack = document.getElementById("music-track");
@@ -500,13 +461,6 @@ window.__SITE = {
       if (hintEl) hintEl.classList.add("is-quiet");
     }
 
-    if (brandHome) {
-      brandHome.addEventListener("click", function () {
-        markInteracted();
-        if (window.__IPOD_BRIDGE) window.__IPOD_BRIDGE.openScreen("main");
-      });
-    }
-
     if (btnToggle) {
       btnToggle.addEventListener("click", function () {
         markInteracted();
@@ -517,10 +471,7 @@ window.__SITE = {
     if (btnTrack) {
       btnTrack.addEventListener("click", function () {
         markInteracted();
-        if (!window.__IPOD_BRIDGE) return;
-        var pb = window.__IPOD_BRIDGE.getPlayback();
-        if (pb && pb.hasLoadedItem) window.__IPOD_BRIDGE.openNowPlaying();
-        else window.__IPOD_BRIDGE.openNowPlaying();
+        if (window.__IPOD_BRIDGE) window.__IPOD_BRIDGE.openNowPlaying();
       });
     }
 
@@ -541,122 +492,35 @@ window.__SITE = {
         pill.setAttribute("data-loaded", loaded ? "true" : "false");
       }
       if (btnToggle) {
-        btnToggle.setAttribute("aria-label", playing ? "Pause music" : "Play music");
+        btnToggle.setAttribute("aria-label", playing ? "Mute music" : "Unmute and play music");
+        btnToggle.setAttribute("aria-pressed", playing ? "true" : "false");
       }
       if (btnNext) {
         btnNext.hidden = !(loaded && d.queueLength > 1);
       }
       if (d.track && titleEl && artistEl) {
-        titleEl.textContent = d.track.name || "Studio Ambient";
-        artistEl.textContent = d.track.artistName || "";
+        if (playing) {
+          titleEl.textContent = d.track.name || "Playing";
+          artistEl.textContent = d.track.artistName || "";
+        } else {
+          titleEl.textContent = "Muted";
+          artistEl.textContent = d.track.name || "Dear Prudence";
+        }
       } else if (titleEl && artistEl) {
-        titleEl.textContent = "Studio Ambient";
-        artistEl.textContent = "Play";
+        titleEl.textContent = "Sound Off";
+        artistEl.textContent = "Dear Prudence";
       }
     });
 
-    /* Notes drawer */
-    var notesBtn = document.getElementById("notes-toggle");
-    var notesSheet = document.getElementById("notes-sheet");
-    var notesBackdrop = document.getElementById("notes-backdrop");
-    var notesClose = document.getElementById("notes-close");
-    var notesBody = document.getElementById("notes-body");
-    var notesOpen = false;
-    var activePostId = null;
-
-    function escHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    function renderNotes() {
-      if (!notesBody) return;
-      var posts = window.__POSTS || [];
-      if (activePostId) {
-        var post = posts.find(function (p) { return p.id === activePostId; });
-        if (post) {
-          var paras = (post.body || []).map(function (p) {
-            return "<p>" + escHtml(p) + "</p>";
-          }).join("");
-          notesBody.innerHTML =
-            '<button type="button" class="note-back" id="note-back">&larr; All notes</button>' +
-            '<article class="note-article">' +
-              "<h3>" + escHtml(post.title) + "</h3>" +
-              '<p class="note-meta">' + escHtml(post.date) + " &middot; " + escHtml(post.readTime) + "</p>" +
-              paras +
-            "</article>";
-          var back = document.getElementById("note-back");
-          if (back) back.addEventListener("click", function () { activePostId = null; renderNotes(); });
-          return;
-        }
-      }
-      notesBody.innerHTML = '<div class="note-list">' + posts.map(function (p) {
-        return '<button type="button" class="note-item" data-post-id="' + escHtml(p.id) + '">' +
-          '<span class="note-item-title">' + escHtml(p.title) + "</span>" +
-          '<span class="note-item-meta">' + escHtml(p.date) + " &middot; " + escHtml(p.readTime) + "</span>" +
-        "</button>";
-      }).join("") + "</div>";
-      notesBody.querySelectorAll(".note-item").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          activePostId = btn.getAttribute("data-post-id");
-          renderNotes();
-        });
-      });
-    }
-
-    function setNotesOpen(open) {
-      if (!notesSheet || !notesBackdrop || !notesBtn) return;
-      notesOpen = open;
-      notesBtn.setAttribute("aria-expanded", open ? "true" : "false");
-      if (open) {
-        renderNotes();
-        notesBackdrop.hidden = false;
-        notesSheet.hidden = false;
-        requestAnimationFrame(function () {
-          notesBackdrop.classList.add("is-open");
-          notesSheet.classList.add("is-open");
-        });
-        if (notesClose) notesClose.focus();
-      } else {
-        notesBackdrop.classList.remove("is-open");
-        notesSheet.classList.remove("is-open");
-        setTimeout(function () {
-          if (!notesOpen) {
-            notesBackdrop.hidden = true;
-            notesSheet.hidden = true;
-          }
-        }, 230);
-        notesBtn.focus();
-      }
-    }
-
-    if (notesBtn) notesBtn.addEventListener("click", function () { setNotesOpen(!notesOpen); });
-    if (notesClose) notesClose.addEventListener("click", function () { setNotesOpen(false); });
-    if (notesBackdrop) notesBackdrop.addEventListener("click", function () { setNotesOpen(false); });
-
-    /* global keyboard navigation without requiring Tab into the LCD first */
     document.addEventListener("keydown", function (e) {
-      if (notesOpen) {
-        if (e.key === "Escape") {
-          e.preventDefault();
-          setNotesOpen(false);
-        }
-        return;
-      }
-
       var host = document.getElementById("ipod");
       if (!host || !host.shadowRoot) return;
 
-      /* ignore if user is focused on HUD buttons except Escape */
       var active = document.activeElement;
       if (active && active !== document.body && active !== host && active.closest && active.closest(".studio-hud")) {
         return;
       }
 
-      /* if the LCD list already has focus, the component handles keys natively */
       if (host.shadowRoot.activeElement && host.shadowRoot.activeElement.classList.contains("menu-items")) {
         markInteracted();
         return;

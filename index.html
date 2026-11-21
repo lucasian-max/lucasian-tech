@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#060608">
-  <meta name="description" content="Mridul Vijay — 16-year-old builder in NSW, Australia. Projects, curated music, and notes inside a working 2004 iPod.">
+  <meta name="description" content="Mridul Vijay — 16-year-old builder in NSW, Australia. Projects and music inside a working 2004 iPod.">
   <title>Mridul Vijay</title>
   <link rel="canonical" href="https://lucasian.tech/">
   <meta name="robots" content="index,follow,max-image-preview:large">
@@ -14,11 +14,11 @@
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/favicon-180.png">
 
-  <link rel="modulepreload" href="includes/ipod/web-music-ipod.esm.js?v=v2">
-  <link rel="stylesheet" href="styles.css?v=v2">
+  <link rel="modulepreload" href="includes/ipod/web-music-ipod.esm.js?v=v3">
+  <link rel="stylesheet" href="styles.css?v=v3">
 
   <meta property="og:title" content="Mridul Vijay">
-  <meta property="og:description" content="16-year-old builder in NSW, Australia. Projects, music, and notes presented as a working 2004 iPod.">
+  <meta property="og:description" content="16-year-old builder in NSW, Australia. Projects and music presented as a working 2004 iPod.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://lucasian.tech/">
   <meta property="og:image" content="https://lucasian.tech/assets/og-v2.jpg">
@@ -27,7 +27,7 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Mridul Vijay">
-  <meta name="twitter:description" content="Projects, curated music, and notes inside a working 2004 iPod.">
+  <meta name="twitter:description" content="Projects and music inside a working 2004 iPod.">
   <meta name="twitter:image" content="https://lucasian.tech/assets/og-v2.jpg">
 
   <script type="application/ld+json">
@@ -35,7 +35,7 @@
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Mridul Vijay",
-    "description": "16-year-old builder in NSW, Australia. Projects, curated music, and notes presented as a working 2004 iPod.",
+    "description": "16-year-old builder in NSW, Australia. Projects and music presented as a working 2004 iPod.",
     "url": "https://lucasian.tech/",
     "homeLocation": { "@type": "Place", "name": "New South Wales, Australia" },
     "knowsAbout": ["rockets", "artificial intelligence", "Rust", "web development"],
@@ -59,38 +59,38 @@
   }
   </script>
 
-  <script src="posts.js?v=v2"></script>
-  <script src="app.js?v=v2"></script>
-  <script type="module" src="includes/ipod/web-music-ipod.esm.js?v=v2"></script>
+  <script src="app.js?v=v3"></script>
+  <script type="module" src="includes/ipod/web-music-ipod.esm.js?v=v3"></script>
 </head>
 <body>
-  <header class="studio-hud" aria-label="Studio controls">
-    <button type="button" class="hud-brand" id="brand-home" title="Return to iPod root menu">
-      <span class="brand-dot" aria-hidden="true"></span>
-      <span class="brand-name">Mridul Vijay</span>
-    </button>
+  <header class="studio-hud" aria-label="Audio controls">
+    <div class="ipod-remote" id="music-pill" data-playing="false" data-loaded="false">
+      <button type="button" class="remote-key remote-mute" id="music-toggle" aria-label="Unmute and play music" aria-pressed="false" title="Unmute / Mute">
+        <span class="mute-glyph" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 6.2H5l3.2-2.7v9L5 9.8H2.5z" fill="currentColor" stroke="none"/>
+            <path d="M11 6l3 4M14 6l-3 4"/>
+          </svg>
+        </span>
+        <span class="sound-glyph" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 6.2H5l3.2-2.7v9L5 9.8H2.5z" fill="currentColor" stroke="none"/>
+            <path d="M10.7 5.8a3.2 3.2 0 0 1 0 4.4"/>
+            <path d="M12.6 4.1a5.6 5.6 0 0 1 0 7.8"/>
+          </svg>
+        </span>
+      </button>
 
-    <div class="hud-actions">
-      <div class="music-pill" id="music-pill" data-playing="false" data-loaded="false">
-        <button type="button" class="pill-btn pill-play" id="music-toggle" aria-label="Play studio ambient music">
-          <span class="play-glyph" aria-hidden="true">
-            <svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor"><path d="M2.5 1.75v8.5L10 6z"/></svg>
-          </span>
-          <span class="eq-bars" aria-hidden="true">
-            <i></i><i></i><i></i>
-          </span>
-        </button>
-        <button type="button" class="pill-btn pill-track" id="music-track" title="Open Now Playing on iPod">
-          <span class="pill-title" id="music-title">Studio Ambient</span>
-          <span class="pill-artist" id="music-artist">Play</span>
-        </button>
-        <button type="button" class="pill-btn pill-next" id="music-next" aria-label="Next track" title="Next track" hidden>
-          <svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M2 2.2v7.6L7.6 6 2 2.2zm6.4 0H10v7.6H8.4V2.2z"/></svg>
-        </button>
-      </div>
+      <button type="button" class="remote-lcd" id="music-track" title="Open Now Playing on iPod">
+        <span class="lcd-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="lcd-title" id="music-title">Sound Off</span>
+        <span class="lcd-artist" id="music-artist">Dear Prudence</span>
+      </button>
 
-      <button type="button" class="hud-notes-btn" id="notes-toggle" aria-expanded="false" aria-controls="notes-sheet">
-        Notes
+      <button type="button" class="remote-key remote-next" id="music-next" aria-label="Next song" title="Next song" hidden>
+        <svg viewBox="0 0 14 14" width="11" height="11" fill="currentColor" aria-hidden="true">
+          <path d="M2.2 3.1v7.8L8.2 7 2.2 3.1zm6.8 0h1.9v7.8H9V3.1z"/>
+        </svg>
       </button>
     </div>
   </header>
@@ -100,7 +100,7 @@
     <div class="set" id="ipod-set">
       <div class="lcd-spill" id="lcd-spill" aria-hidden="true"></div>
       <div class="chassis-rig" id="chassis-rig">
-        <web-music-ipod id="ipod" aria-label="Portfolio navigation"></web-music-ipod>
+        <web-music-ipod id="ipod" backlit="true" aria-label="Portfolio navigation"></web-music-ipod>
         <div class="chassis-sheen" aria-hidden="true"></div>
       </div>
       <div class="floor" aria-hidden="true"><div class="occlusion"></div></div>
@@ -109,15 +109,6 @@
       Click a row, scroll, or spin the wheel<span class="hint-keys"> &nbsp;&middot;&nbsp; <kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>Enter</kbd> <kbd>Esc</kbd></span>
     </p>
   </main>
-
-  <div class="notes-backdrop" id="notes-backdrop" hidden></div>
-  <aside class="notes-sheet" id="notes-sheet" role="dialog" aria-modal="true" aria-labelledby="notes-heading" hidden>
-    <div class="notes-header">
-      <h2 id="notes-heading">Notes</h2>
-      <button type="button" class="notes-close" id="notes-close" aria-label="Close notes">Close</button>
-    </div>
-    <div class="notes-body" id="notes-body"></div>
-  </aside>
 
   <noscript>
     <h2>Mridul Vijay — portfolio</h2>

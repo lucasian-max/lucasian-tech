@@ -4,227 +4,115 @@
   "language": "en-US",
   "songs": [
     {
-      "id": "studio-ambient-01",
-      "name": "Midnight Desk",
-      "artistName": "Studio Ambient",
-      "albumName": "lucasian.tech",
-      "previewUrl": "/assets/audio/studio-ambient.mp3"
-    },
-    {
-      "id": "the-beatles-dear-prudence",
+      "id": "dear-prudence",
       "name": "Dear Prudence",
       "artistName": "The Beatles",
-      "albumName": "The Beatles (The White Album)",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/67/e6/b1/67e6b144-5bab-33ef-ca80-4e00a90b1045/mzaf_5657385464291037677.plus.aac.p.m4a"
+      "albumName": "The Beatles (White Album)",
+      "previewUrl": "/assets/audio/dear-prudence.mp3"
     },
     {
-      "id": "fleetwood-mac-gypsy",
+      "id": "gypsy",
       "name": "Gypsy",
       "artistName": "Fleetwood Mac",
-      "albumName": "Mirage (Deluxe)",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/9e/47/01/9e470171-94ed-1e65-e846-7ce38c69edb2/mzaf_8168409245960002310.plus.aac.p.m4a"
+      "albumName": "The Very Best of Fleetwood Mac",
+      "previewUrl": "/assets/audio/gypsy.mp3"
     },
     {
-      "id": "radiohead-electioneering",
-      "name": "Electioneering",
-      "artistName": "Radiohead",
-      "albumName": "OK Computer",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/c7/5d/c8/c75dc855-dd12-b6dd-2b7a-0803e0aac773/mzaf_7132161904352090350.plus.aac.p.m4a"
-    },
-    {
-      "id": "radiohead-bloom",
-      "name": "Bloom",
-      "artistName": "Radiohead",
-      "albumName": "The King of Limbs",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/a9/05/40/a90540ad-5214-1560-a052-39ea8e03a3df/mzaf_18439408303364865625.plus.aac.p.m4a"
-    },
-    {
-      "id": "radiohead-no-surprises",
+      "id": "no-surprises",
       "name": "No Surprises",
       "artistName": "Radiohead",
       "albumName": "OK Computer",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/f0/2a/fa/f02afaad-0a7f-9ceb-1236-55ef3d388061/mzaf_10063872040766906863.plus.aac.p.m4a"
+      "previewUrl": "/assets/audio/no-surprises.mp3"
     },
     {
-      "id": "fleetwood-mac-the-chain",
+      "id": "the-chain",
       "name": "The Chain",
       "artistName": "Fleetwood Mac",
-      "albumName": "Rumours (Super Deluxe Edition)",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/15/9f/31/159f3139-16ab-6ccf-813f-86d4adffcf61/mzaf_17361308171774933378.plus.aac.p.m4a"
+      "albumName": "The Very Best of Fleetwood Mac",
+      "previewUrl": "/assets/audio/the-chain.mp3"
     },
     {
-      "id": "fleetwood-mac-sisters-of-the-moon",
-      "name": "Sisters of the Moon",
+      "id": "karma-police",
+      "name": "Karma Police",
+      "artistName": "Radiohead",
+      "albumName": "OK Computer",
+      "previewUrl": "/assets/audio/karma-police.mp3"
+    },
+    {
+      "id": "dreams",
+      "name": "Dreams",
       "artistName": "Fleetwood Mac",
-      "albumName": "Tusk (Remastered)",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/d0/10/eb/d010ebff-2ad0-5496-9aef-8c9ad34f3a43/mzaf_1974603026066072556.plus.aac.p.m4a"
+      "albumName": "The Very Best of Fleetwood Mac",
+      "previewUrl": "/assets/audio/dreams.mp3"
     },
     {
-      "id": "king-crimson-peace-a-beginning",
-      "name": "Peace - A Beginning",
-      "artistName": "King Crimson",
-      "albumName": "In the Wake of Poseidon (Expanded Edition)",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/42/04/bc/4204bc23-32b0-ee98-63f1-8673b98e03c3/mzaf_5709734384693425001.plus.aac.p.m4a"
-    },
-    {
-      "id": "the-beatles-glass-onion",
-      "name": "Glass Onion",
-      "artistName": "The Beatles",
-      "albumName": "The Beatles (The White Album)",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/29/14/e0/2914e098-9bfe-2e54-886a-49c4bb8769e7/mzaf_14499958596048445037.plus.aac.p.m4a"
-    },
-    {
-      "id": "cream-tales-of-brave-ulysses",
-      "name": "Tales of Brave Ulysses",
-      "artistName": "Cream",
-      "albumName": "Disraeli Gears (Deluxe Edition)",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/7b/66/b5/7b66b5c2-12ed-5e20-75cf-146e32d1ce35/mzaf_1237164070055684406.plus.aac.p.m4a"
-    },
-    {
-      "id": "deftones-change",
-      "name": "Change (In the House of Flies)",
-      "artistName": "Deftones",
-      "albumName": "White Pony",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/86/a3/cd/86a3cd88-0036-3828-a67b-8174790c0355/mzaf_17335092681325376243.plus.aac.p.m4a"
-    },
-    {
-      "id": "daft-punk-veridis-quo",
+      "id": "veridis-quo",
       "name": "Veridis Quo",
       "artistName": "Daft Punk",
       "albumName": "Discovery",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/e0/cc/c4/e0ccc4af-ad90-59fe-9a7c-9c32d1a3c380/mzaf_2643765405421046671.plus.aac.p.m4a"
+      "previewUrl": "/assets/audio/veridis-quo.mp3"
     },
     {
-      "id": "pink-floyd-another-brick-in-the-wall-pt-2",
-      "name": "Another Brick In the Wall, Pt. 2",
-      "artistName": "Pink Floyd",
-      "albumName": "The Wall",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/8a/21/41/8a214193-f9e0-fbeb-aad5-6ca8b8420dbb/mzaf_2628810625325580575.plus.aac.p.m4a"
-    },
-    {
-      "id": "led-zeppelin-kashmir",
-      "name": "Kashmir",
-      "artistName": "Led Zeppelin",
-      "albumName": "Physical Graffiti (Remastered)",
-      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/0f/3e/53/0f3e5399-7fe8-7831-dc72-13498e72cf9c/mzaf_3019794265282233519.plus.aac.p.m4a"
+      "id": "change",
+      "name": "Change (In the House of Flies)",
+      "artistName": "Deftones",
+      "albumName": "White Pony",
+      "previewUrl": "/assets/audio/change.mp3"
     }
   ],
   "artists": [
     {
-      "id": "artist-cream",
-      "name": "Cream",
-      "songIds": [
-        "cream-tales-of-brave-ulysses"
-      ]
-    },
-    {
       "id": "artist-daft-punk",
       "name": "Daft Punk",
       "songIds": [
-        "daft-punk-veridis-quo"
+        "veridis-quo"
       ]
     },
     {
       "id": "artist-deftones",
       "name": "Deftones",
       "songIds": [
-        "deftones-change"
+        "change"
       ]
     },
     {
       "id": "artist-fleetwood-mac",
       "name": "Fleetwood Mac",
       "songIds": [
-        "fleetwood-mac-gypsy",
-        "fleetwood-mac-the-chain",
-        "fleetwood-mac-sisters-of-the-moon"
-      ]
-    },
-    {
-      "id": "artist-king-crimson",
-      "name": "King Crimson",
-      "songIds": [
-        "king-crimson-peace-a-beginning"
-      ]
-    },
-    {
-      "id": "artist-led-zeppelin",
-      "name": "Led Zeppelin",
-      "songIds": [
-        "led-zeppelin-kashmir"
-      ]
-    },
-    {
-      "id": "artist-pink-floyd",
-      "name": "Pink Floyd",
-      "songIds": [
-        "pink-floyd-another-brick-in-the-wall-pt-2"
+        "gypsy",
+        "the-chain",
+        "dreams"
       ]
     },
     {
       "id": "artist-radiohead",
       "name": "Radiohead",
       "songIds": [
-        "radiohead-electioneering",
-        "radiohead-bloom",
-        "radiohead-no-surprises"
-      ]
-    },
-    {
-      "id": "artist-studio-ambient",
-      "name": "Studio Ambient",
-      "songIds": [
-        "studio-ambient-01"
+        "no-surprises",
+        "karma-police"
       ]
     },
     {
       "id": "artist-the-beatles",
       "name": "The Beatles",
       "songIds": [
-        "the-beatles-dear-prudence",
-        "the-beatles-glass-onion"
+        "dear-prudence"
       ]
     }
   ],
   "playlists": [
     {
-      "id": "pl-ambient",
-      "name": "Studio Ambient",
-      "songIds": [
-        "studio-ambient-01",
-        "the-beatles-dear-prudence",
-        "fleetwood-mac-gypsy",
-        "radiohead-electioneering",
-        "radiohead-bloom"
-      ]
-    },
-    {
-      "id": "pl-repeat",
+      "id": "pl-favorites",
       "name": "On Repeat",
       "songIds": [
-        "the-beatles-dear-prudence",
-        "fleetwood-mac-gypsy",
-        "radiohead-electioneering",
-        "radiohead-bloom",
-        "radiohead-no-surprises",
-        "fleetwood-mac-the-chain",
-        "fleetwood-mac-sisters-of-the-moon"
-      ]
-    },
-    {
-      "id": "pl-rotation",
-      "name": "Heavy Rotation",
-      "songIds": [
-        "radiohead-no-surprises",
-        "fleetwood-mac-the-chain",
-        "fleetwood-mac-sisters-of-the-moon",
-        "king-crimson-peace-a-beginning",
-        "the-beatles-glass-onion",
-        "cream-tales-of-brave-ulysses",
-        "deftones-change",
-        "daft-punk-veridis-quo",
-        "pink-floyd-another-brick-in-the-wall-pt-2",
-        "led-zeppelin-kashmir"
+        "dear-prudence",
+        "gypsy",
+        "no-surprises",
+        "the-chain",
+        "karma-police",
+        "dreams",
+        "veridis-quo",
+        "change"
       ]
     }
   ]
