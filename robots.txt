@@ -1,0 +1,5 @@
+# lucasian.tech — public portfolio
+User-agent: *
+Allow: /
+
+Sitemap: https://lucasian.tech/sitemap.xml

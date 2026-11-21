@@ -983,7 +983,7 @@ const Ka = [
   }
 ];
 var zi = /* @__PURE__ */ ((e) => (e.OFF = "off", e.ON = "on", e))(zi || {});
-const Ql = { storefront: "us", language: "en-US" }, Ga = "apple-ipod:settings", ns = 2e3, ss = 1e4, os = 15, hs = 15, Ya = 350, rs = 100 / Ya * 100, cs = 276 / Ya * 100, ps = 1e4, Oe = 1e3, ul = 500, Ol = [5, 5, 5, 10, 10, 10, 20], ds = 1, As = 1e3, fs = 5e3, vl = {
+const Ql = { storefront: "us", language: "en-US" }, Ga = "apple-ipod:settings", ns = 320, ss = 1e4, os = 15, hs = 15, Ya = 350, rs = 100 / Ya * 100, cs = 276 / Ya * 100, ps = 1e4, Oe = 1e3, ul = 500, Ol = [5, 5, 5, 10, 10, 10, 20], ds = 1, As = 1e3, fs = 5e3, vl = {
   minSpeed: 180,
   tierMs: 500,
   tiers: [1, 2, 3, 5, 8, 13, 21, 34]
@@ -4238,16 +4238,21 @@ function Ih(e, t) {
 function ol(e, t, i) {
   return { id: e, title: t, action: "inline-toggle", toggleKey: e, values: i };
 }
-function Sh({ i18n: e, hasNowPlaying: t }) {
-  // Four rows, matching the 2004 root menu's shape: one list of services, one
-  // list of projects, one live screen, and About (which still holds the Brick
-  // easter egg on a long centre-press).
+function Sh({ i18n: e }) {
   return [
+    Ee("music", e),
     Ee("projects", e),
-    Ee("self-hosted", e),
     Ee("about", e),
-    Ee("contacts", e),
-    ...t ? [Ee("now-playing", e)] : []
+    Ee("contacts", e)
+  ];
+}
+function MusicHub({ i18n: e, hasNowPlaying: t }) {
+  return [
+    ...t ? [Ee("now-playing", e)] : [],
+    Ee("playlists", e),
+    Ee("songs", e),
+    Ee("artists", e),
+    Ee("settings", e)
   ];
 }
 function xh({ i18n: e }) {
@@ -4292,12 +4297,9 @@ function _h({ i18n: e }) {
   ];
 }
 function Ch({ data: e, i18n: t }) {
-  // The About screen is owned by the site, not the component: everything comes
-  // from window.__SITE.about so the copy can change without touching the bundle.
-  // Rows are ordered name, facts, links, then the device trivia.
   var A = (window.__SITE && window.__SITE.about) || {};
   var rows = [
-    { id: "me", title: A.name || "iPod", action: "info", centered: !0 }
+    { id: "me", title: A.name || "Mridul Vijay", action: "info", centered: !0 }
   ];
   (A.facts || []).forEach(function (f, i) {
     if (!f || !f.title) return;
@@ -4313,30 +4315,17 @@ function Ch({ data: e, i18n: t }) {
     rows.push({ id: "link-" + i, title: l.title, action: "link", url: l.url });
   });
   var D = A.device || {};
-  var gb = function (v) {
-    return t.formatNumber(v, { style: "unit", unit: "gigabyte" });
-  };
-  if (D.capacity != null) {
-    rows.push({
-      id: "capacity",
-      title: t.t("ASE.Web.IPod.About.Capacity"),
-      action: "info",
-      value: gb(D.capacity)
-    });
-  }
-  if (D.available != null) {
-    rows.push({
-      id: "available",
-      title: t.t("ASE.Web.IPod.About.Available"),
-      action: "info",
-      value: gb(D.available)
-    });
-  }
   rows.push({
     id: "version",
     title: t.t("ASE.Web.IPod.About.Version"),
     action: "info",
-    value: D.version || "2644.1.0"
+    value: D.version || "2644.2.0"
+  });
+  rows.push({
+    id: "about-brick",
+    title: t.t("ASE.Web.IPod.Game.Title"),
+    action: "navigate",
+    target: "brick"
   });
   return rows;
 }
@@ -4391,83 +4380,61 @@ function Ad(e) {
     return row;
   }) : [{ id: "empty", title: "Nothing yet", action: "info", centered: !0 }];
 }
-// The "Now" screen: one random item from the archive, re-rolled by pressing
-// the centre button. Items can be links or plain info rows; the pool is baked
-// into window.__SITE at deploy time so this never needs a network round trip.
-function Au() {
-  var pool = (window.__SITE && window.__SITE.now) || [];
-  pool = pool.filter(function (i) { return i && i.title; });
-  if (!pool.length) {
-    return [{ id: "empty", title: "Nothing yet", action: "info", centered: !0 }];
-  }
-  function pick() {
-    var n = Math.floor(Math.random() * pool.length);
-    var it = pool[n];
-    var row = { id: "now-" + n, title: it.title, action: it.url ? "link" : "info" };
-    if (it.url) row.url = it.url;
-    if (it.value) row.value = it.value;
-    return row;
-  }
-  var first = pick();
-  return [first].concat(
-    pool.filter(function (_, i) { return i !== pool.indexOf(pool.find(function (x) { return x.title === first.title; })); })
-        .slice(0, 3)
-        .map(function (it, i) {
-          var row = { id: "nowx-" + i, title: it.title, action: it.url ? "link" : "info" };
-          if (it.url) row.url = it.url;
-          if (it.value) row.value = it.value;
-          return row;
-        })
-  );
-}
-function ShGroups() {
-  var list = (window.__SITE && window.__SITE.selfHosted) || [];
-  var order = ["Server", "Media", "Reading", "Tools"];
-  var counts = {};
-  list.forEach(function (i) { if (i && i.group) counts[i.group] = (counts[i.group] || 0) + 1; });
-  var srv = (window.__SITE && window.__SITE.server) || {};
-  counts.Server = srv.services != null ? srv.services : list.length;
-  return order.filter(function (g) { return counts[g]; }).map(function (g) {
-    /* No value: the component gives navigate rows a chevron and nothing else.
-       The numbers live on the Server screen, where info rows render them. */
-    return {
-      id: "shg-" + g,
-      title: g,
-      action: "navigate",
-      target: "sh-" + g.toLowerCase()
-    };
+function ProjectsList() {
+  var list = ((window.__SITE && window.__SITE.projects) || []).filter(function (i) {
+    return i && i.title;
   });
-}
-function ShGroup(name) {
-  var list = ((window.__SITE && window.__SITE.selfHosted) || []).filter(function (i) {
-    return i && i.group === name;
-  });
-  if (!list.length) return [{ id: "empty", title: "Nothing here", action: "info", centered: !0 }];
-  return list.map(function (i) {
-    var row = { id: "s-" + i.title, title: i.title, action: i.url ? "link" : "info" };
-    if (i.url) row.url = i.url;
-    if (i.purpose) row.value = i.purpose;
+  if (!list.length) return [{ id: "empty", title: "Nothing yet", action: "info", centered: !0 }];
+  return list.map(function (p) {
+    if (p.slug) {
+      return {
+        id: "proj-" + p.slug,
+        title: p.title,
+        action: "navigate",
+        target: "project-detail",
+        contextId: p.slug
+      };
+    }
+    var row = { id: "s-" + p.title, title: p.title, action: "link", url: p.url };
+    if (p.value) row.value = p.value;
     return row;
   });
 }
-function ShServer() {
-  var srv = (window.__SITE && window.__SITE.server) || {};
-  var list = (window.__SITE && window.__SITE.selfHosted) || [];
+function ProjectDetail({ contextId: slug }) {
+  var list = (window.__SITE && window.__SITE.projects) || [];
+  var p = list.find(function (x) { return x && x.slug === slug; });
+  if (!p) return [{ id: "empty", title: "Not found", action: "info", centered: !0 }];
   var rows = [];
-  var n = srv.services != null ? srv.services : list.length;
-  if (n) rows.push({ id: "srv-s", title: "Services", action: "info", value: String(n) });
-  if (srv.domains != null) rows.push({ id: "srv-d", title: "Domains", action: "info", value: String(srv.domains) });
-  if (srv.servers != null) rows.push({ id: "srv-h", title: "Servers", action: "info", value: String(srv.servers) });
-  if (srv.uptime != null) rows.push({ id: "srv-u", title: "Uptime", action: "info", value: String(srv.uptime) });
-  if (srv.backup != null) rows.push({ id: "srv-b", title: "Backup", action: "info", value: String(srv.backup) });
-  return rows.length ? rows : [{ id: "empty", title: "Nothing here", action: "info", centered: !0 }];
+  (p.facts || []).forEach(function (f, i) {
+    if (!f || !f.title) return;
+    rows.push({
+      id: "pf-" + i,
+      title: f.title,
+      action: "info",
+      value: f.value == null ? "" : String(f.value)
+    });
+  });
+  (p.links || []).forEach(function (l, i) {
+    if (!l || !l.title) return;
+    if (l.target) {
+      rows.push({ id: "pl-" + i, title: l.title, action: "navigate", target: l.target });
+    } else if (/^(https?:\/\/|mailto:)/.test(l.url || "")) {
+      rows.push({ id: "pl-" + i, title: l.title, action: "link", url: l.url, value: l.value || "" });
+    }
+  });
+  return rows.length ? rows : [{ id: "empty", title: p.title, action: "info", centered: !0 }];
 }
 const gn = {
   main: {
     view: "list",
-    // Product names are usually not localized.
     title: () => "Mridul Vijay",
     items: Sh,
+    listsNowPlaying: !1
+  },
+  music: {
+    view: "list",
+    titleKey: "Portfolio.Music",
+    items: MusicHub,
     listsNowPlaying: !0
   },
   settings: {
@@ -4531,14 +4498,17 @@ const gn = {
     blocksIdleJump: !0
   },
   contacts: { view: "list", titleKey: "Portfolio.Contacts", items: () => Ad("contacts") },
-  projects: { view: "list", titleKey: "Portfolio.Projects", items: () => Ad("projects") },
-  "self-hosted": { view: "list", titleKey: "Portfolio.SelfHosted", items: () => ShGroups() },
-  "sh-server": { view: "list", title: () => "Server", items: () => ShServer() },
-  "sh-media": { view: "list", title: () => "Media", items: () => ShGroup("Media") },
-  "sh-reading": { view: "list", title: () => "Reading", items: () => ShGroup("Reading") },
-  "sh-tools": { view: "list", title: () => "Tools", items: () => ShGroup("Tools") },
-  now: { view: "list", titleKey: "Portfolio.Now", items: Au },
-  apps: { view: "list", titleKey: "Portfolio.Apps", items: () => Ad("apps") },
+  projects: { view: "list", titleKey: "Portfolio.Projects", items: ProjectsList },
+  "project-detail": {
+    view: "list",
+    titleKey: "Portfolio.Projects",
+    title: ({ contextId: slug }) => {
+      var list = (window.__SITE && window.__SITE.projects) || [];
+      var p = list.find((x) => x && x.slug === slug);
+      return p ? p.title : "Project";
+    },
+    items: ProjectDetail
+  },
   brick: {
     view: "brick",
     titleKey: "ASE.Web.IPod.Game.Title",
@@ -5167,7 +5137,11 @@ function Fh(e, t, i) {
     const At = ft(b);
     if (((Z = At[0]) === null || Z === void 0 ? void 0 : Z.action) !== "toggle") {
       const Tt = Ni(At, A);
-      return Tt >= 0 ? Tt : Math.max(0, j.rememberedIndexIn(b, At));
+      if (Tt >= 0) return Tt;
+      const rem = j.rememberedIndexIn(b, At);
+      if (rem >= 0 && At[rem] && At[rem].action !== "info") return rem;
+      const firstAction = At.findIndex((x) => x && x.action !== "info");
+      return firstAction >= 0 ? firstAction : 0;
     }
     const xt = At.findIndex((Tt) => Tt.action === "toggle" && Tt.target === M[b.key]);
     return xt >= 0 ? xt : 0;
@@ -5189,6 +5163,7 @@ function Fh(e, t, i) {
       suppressNowPlayingSyncAtPush: Z && Lt
     });
     i(47, q = [...q.slice(0, -1), Tt, b]), i(7, Q = se(b)), i(48, Lt = !1), $t(b.key), X.reset();
+    try { window.dispatchEvent(new CustomEvent("ipod:nav", { detail: { stack: q, key: b.key, contextId: b.contextId } })); } catch {}
   }
   function Gt() {
     var b;
@@ -5198,6 +5173,7 @@ function Fh(e, t, i) {
     i(48, Lt = (b = Z.suppressNowPlayingSyncAtPush) !== null && b !== void 0 ? b : !1), $t(Z.key), X.reset();
     const At = ft(Z), xt = Ni(At, A), { selectedIndexAtPush: Tt, scrollTopAtPush: Qe } = Z;
     xt >= 0 && !Lt ? i(7, Q = xt) : i(7, Q = Math.max(0, j.rememberedIndexIn(Z, At))), i(14, D = Q === Tt ? Qe : void 0);
+    try { window.dispatchEvent(new CustomEvent("ipod:nav", { detail: { stack: q, key: Z.key, contextId: Z.contextId } })); } catch {}
   }
   function oe() {
     Gt();
@@ -5291,7 +5267,8 @@ function Fh(e, t, i) {
     if (b)
       switch (b.action) {
         case "link":
-          window.location.href = b.url;
+          if (/^mailto:/i.test(b.url)) window.location.href = b.url;
+          else window.open(b.url, "_blank", "noopener,noreferrer");
           break;
         case "navigate":
           Ft({
@@ -5337,6 +5314,16 @@ function Fh(e, t, i) {
       contextId: b.contextId
     }), k.play(Z), Ft(rl()), !0);
   }
+  function startDefaultAmbient(openNP) {
+    if (!z || !z.songs || !z.songs.length) return !1;
+    const pl = (z.playlists || []).find((p) => p.id === "pl-ambient");
+    const tracks = pl ? nn("playlist-tracks", pl.id, z) : [...z.songs];
+    if (!tracks.length) return !1;
+    j.setQueueSource(pl ? { key: "playlist-tracks", contextId: pl.id } : { key: "songs" });
+    k.play(tracks, 0);
+    if (openNP && n !== "now-playing") Ft(rl());
+    return !0;
+  }
   function zt() {
     if (A.hasLoadedItem) {
       A.isPlaying ? k.pause() : k.resume();
@@ -5352,7 +5339,11 @@ function Fh(e, t, i) {
         B();
         return;
       }
-      A.queue.length > 0 && k.resume();
+      if (A.queue.length > 0) {
+        k.resume();
+        return;
+      }
+      startDefaultAmbient(!0);
     }
   }
   const Vt = Hi();
@@ -5374,6 +5365,41 @@ function Fh(e, t, i) {
   function De(b) {
     K.keepOpen(), K.set(b.detail);
   }
+  window.__IPOD_SCREEN = {
+    getSelectedIndex: () => Q,
+    getScreenKey: () => a && a.key,
+    getStack: () => q.slice(),
+    selectIndex: (idx) => {
+      if (idx < 0 || idx >= h.length || !h[idx] || h[idx].action === "info") return !1;
+      const changed = idx !== Q;
+      i(7, Q = idx);
+      i(48, Lt = !0);
+      return changed;
+    },
+    activateIndex: (idx) => {
+      if (idx < 0 || idx >= h.length || !h[idx] || h[idx].action === "info") return !1;
+      i(7, Q = idx);
+      i(48, Lt = !0);
+      B();
+      return !0;
+    },
+    openNowPlaying: () => {
+      if (n === "now-playing") return !0;
+      if (A.queue.length > 0 || A.hasLoadedItem) { Ft(rl()); return !0; }
+      return startDefaultAmbient(!0);
+    },
+    playAmbient: (openNP = !1) => startDefaultAmbient(openNP),
+    openScreen: (key, contextId) => {
+      if (!pe(key)) return !1;
+      if (key === "main") {
+        while (q.length > 1) Gt();
+        return !0;
+      }
+      while (q.length > 1) Gt();
+      Ft({ key, contextId });
+      return !0;
+    }
+  };
   je(() => {
     _.destroy(), K.destroy(), Yt.destroy();
   });
@@ -7751,9 +7777,74 @@ function i1(e, t, i) {
     k.setVolume(ml(A.volume)), nt(async (kt) => {
       await kt(), i(32, q = !0);
     });
+    const emitPlayback = (state) => {
+      try {
+        const track = state.queue && state.queue[state.currentTrackIndex] ? state.queue[state.currentTrackIndex] : null;
+        window.dispatchEvent(new CustomEvent("ipod:playback", {
+          detail: {
+            isPlaying: !!state.isPlaying,
+            hasLoadedItem: !!state.hasLoadedItem,
+            isLoading: !!state.isLoading,
+            currentTime: state.currentPlaybackTime || 0,
+            duration: state.currentPlaybackDuration || 0,
+            volume: state.volume,
+            trackIndex: state.currentTrackIndex || 0,
+            queueLength: state.queue ? state.queue.length : 0,
+            track
+          }
+        }));
+      } catch {}
+    };
+    const unsubPb = k.subscribe(emitPlayback);
+    window.__IPOD_BRIDGE = {
+      unlockAudio: () => dt(),
+      clickTick: () => S(1, "list"),
+      toggleMusic: () => {
+        dt();
+        if (g.hasLoadedItem) {
+          g.isPlaying ? k.pause() : k.resume();
+          return !0;
+        }
+        return !!(window.__IPOD_SCREEN && window.__IPOD_SCREEN.playAmbient(!1));
+      },
+      openNowPlaying: () => {
+        dt();
+        return !!(window.__IPOD_SCREEN && window.__IPOD_SCREEN.openNowPlaying());
+      },
+      nextTrack: () => {
+        dt();
+        if (g.hasLoadedItem) k.skipNext();
+      },
+      prevTrack: () => {
+        dt();
+        if (g.hasLoadedItem) k.skipPrevious();
+      },
+      back: () => {
+        dt();
+        j && j.back();
+      },
+      selectIndex: (idx) => {
+        dt();
+        const changed = !!(window.__IPOD_SCREEN && window.__IPOD_SCREEN.selectIndex(idx));
+        if (changed) S(1, "list");
+        return changed;
+      },
+      activateIndex: (idx) => {
+        dt();
+        const ok = !!(window.__IPOD_SCREEN && window.__IPOD_SCREEN.activateIndex(idx));
+        if (ok) S(1, "list");
+        return ok;
+      },
+      openScreen: (key, contextId) => {
+        dt();
+        return !!(window.__IPOD_SCREEN && window.__IPOD_SCREEN.openScreen(key, contextId));
+      },
+      getPlayback: () => g,
+      getScreen: () => window.__IPOD_SCREEN || null
+    };
     const B = Sa.subscribe(Gt);
     return () => {
-      B(), Ft();
+      B(), unsubPb(), Ft();
     };
   }), je(() => {
     F.flush(), tt(), k.destroy(), Y.destroy();
@@ -7770,9 +7861,13 @@ function i1(e, t, i) {
     O = B, i(10, O);
   }
   const ee = (B) => j == null ? void 0 : j.steerPaddle(B.detail), ge = () => j.select(), me = () => j.selectHold(), be = () => j.back(), Yt = () => j.play(), Me = () => j == null ? void 0 : j.seekController.handleDragEnd(), we = () => {
-    o || k.skipPrevious();
+    if (o) return;
+    if (g.hasLoadedItem) k.skipPrevious();
+    else if (j && j.moveBy(-1, 1)) S(1, "list");
   }, he = () => {
-    o || k.skipNext();
+    if (o) return;
+    if (g.hasLoadedItem) k.skipNext();
+    else if (j && j.moveBy(1, 1)) S(1, "list");
   }, qt = (B) => Bt(-1, B.detail), ke = (B) => Bt(1, B.detail);
   return e.$$set = (B) => {
     "locale" in B && i(24, E = B.locale), "dragStepDegrees" in B && i(25, I = B.dragStepDegrees), "backlit" in B && i(26, x = B.backlit), "playback" in B && i(27, U = B.playback), "navigateToUrl" in B && i(0, C = B.navigateToUrl), "i18n" in B && i(28, G = B.i18n);

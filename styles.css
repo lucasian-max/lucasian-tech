@@ -1,16 +1,43 @@
+:root {
+  --void: #060608;
+  --wall: #111116;
+  --floor-top: #13131a;
+  --warm-key: rgba(255, 245, 228, 0.088);
+  --lcd-glow: rgba(176, 206, 234, 0.17);
+  --hud-bg: rgba(255, 255, 255, 0.042);
+  --hud-bg-hover: rgba(255, 255, 255, 0.085);
+  --hud-border: rgba(255, 255, 255, 0.095);
+  --hud-border-hover: rgba(255, 255, 255, 0.2);
+  --ink: #eef0f4;
+  --ink-muted: rgba(238, 240, 244, 0.54);
+  --ink-dim: rgba(238, 240, 244, 0.34);
+  --el-blue: #c8def2;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
-  /* Not #000: a pure black field makes every shadow mathematically invisible,
-     which is why the device read as a floating image. */
-  background: #08080a;
-  color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: var(--void);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html {
   height: 100%;
+}
+
+body {
+  min-height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .sr-only {
@@ -25,16 +52,7 @@ html {
   border: 0;
 }
 
-body {
-  min-height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
-/* ---- the set ------------------------------------------------------------
-   A 2004 product shot is a seamless studio sweep, not a wooden desk. The
-   floor is a child of .set, so the horizon is pinned to the device's own
-   base at every viewport size instead of drifting with a vh percentage. */
+/* ---- studio cyclorama backdrop ----------------------------------------- */
 body::before {
   content: "";
   position: fixed;
@@ -42,121 +60,258 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 62% 44% at 50% 2%, rgba(255,251,240,0.075), transparent 70%),
-    linear-gradient(180deg, #101014 0%, #0b0b0f 44%, #08080a 72%, #050507 100%);
+    radial-gradient(ellipse 58% 42% at 50% 4%, var(--warm-key), transparent 72%),
+    radial-gradient(ellipse 38% 34% at 50% 46%, rgba(164, 196, 228, 0.045), transparent 70%),
+    linear-gradient(180deg, var(--wall) 0%, #0b0b10 46%, #08080b 74%, var(--void) 100%);
+  transition: opacity 900ms ease;
 }
 
-/* a 3% dither field: 8-bit radial gradients band visibly on near-black */
+/* subtle 8-bit dither grain so dark radial gradients never band */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.055;
+  opacity: 0.05;
   mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.set {
-  /* Absolutely centred rather than grid-centred: a grid item wider than its
-     column clamps to the start edge instead of centring, which pushed the
-     440px set 25px right on a 390px phone. */
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 1;
-  /* Fixed geometry: the device is 440x692 here and the floor starts at its
-     bottom edge. Breakpoints scale .set as a whole with `zoom`, so layout
-     pixels (and therefore the floor's anchor) shrink with it. Scaling the
-     host instead would trip the component's own container query and
-     double-shrink the device. */
-  width: 440px;
-  height: 692px;
-  /* Scaled, not zoomed: `zoom` changes the layout width, which trips the
-     component's own `width < 440px` container query and shrinks the device
-     again — leaving a gap between its base and the floor. `scale` keeps the
-     layout box at 440x692 so the device never changes size internally. */
-  transform: translate(-50%, -50%) scale(var(--set-scale, 1));
-  transform-origin: center;
-  --set-scale: 1;
-}
-
-/* Everything that has to know where the device base is hangs off .floor.
-   It is absolutely placed at top:100% of .set, so its top edge IS the
-   device's base edge at every viewport size — no vh arithmetic to drift. */
-.floor {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  /* Oversized so it still spans the viewport after .set is scaled down. */
-  width: 300vw;
-  height: 42vh;
-  pointer-events: none;
-  background: linear-gradient(180deg, #0e0e14 0%, #0a0a0f 44%, #050507 100%);
-}
-
-/* the horizon: the single line that turns the lateral void into a room.
-   Fades outward, so it runs unbroken under the device and dies at the
-   viewport edges rather than stopping short of the corners. */
-.floor::before {
-  content: "";
-  position: absolute;
+/* ---- perimeter studio HUD ---------------------------------------------- */
+.studio-hud {
+  position: fixed;
+  top: 0;
   left: 0;
   right: 0;
-  top: -13px;
-  height: 26px;
-  /* A hairline reads as a CSS border. A wide, low-opacity band centred on the
-     base reads as the light catching a seamless cyclorama. */
-  -webkit-mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
-  mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
-  filter: blur(5px);
-  background: linear-gradient(90deg,
-    transparent 0%, transparent 18%,
-    rgba(255,255,255,0.035) 30%, rgba(255,255,255,0.075) 40%,
-    rgba(255,255,255,0.09) 50%,
-    rgba(255,255,255,0.075) 60%, rgba(255,255,255,0.035) 70%,
-    transparent 82%, transparent 100%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(18px, env(safe-area-inset-top, 18px)) max(22px, env(safe-area-inset-right, 22px)) 14px max(22px, env(safe-area-inset-left, 22px));
+  pointer-events: none;
 }
 
-/* Grounded shadow, drawn ON the floor: a near-black occlusion line hugging
-   the base, then a squash-and-blur cast shadow spilling forward, then a faint
-   bounce light so the floor reads as a surface rather than a void. */
-.floor::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 470px;
-  height: 46px;
-  transform: translate(-50%, -46%);
+.studio-hud > * {
+  pointer-events: auto;
+}
+
+.hud-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 11px 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-muted);
+  font: 500 13px/1 inherit;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: color 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.hud-brand:hover,
+.hud-brand:focus-visible {
+  color: var(--ink);
+  background: var(--hud-bg);
+  border-color: var(--hud-border);
+  outline: none;
+}
+
+.brand-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background:
-    /* bounce light, just under the base */
-    radial-gradient(ellipse 62% 30% at 50% 74%, rgba(255,255,255,0.045), transparent 70%),
-    /* the cast shadow, spilling forward onto the floor */
-    radial-gradient(ellipse 54% 46% at 50% 22%, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.72) 38%, rgba(0,0,0,0.30) 66%, transparent 100%);
-  filter: blur(9px);
+  background: rgba(238, 240, 244, 0.32);
+  transition: background 320ms ease, box-shadow 320ms ease;
 }
 
-/* a razor occlusion line where the chassis meets the floor */
-.floor {
-  isolation: isolate;
-}
-.floor > .occlusion {
-  position: absolute;
-  left: 50%;
-  top: -1px;
-  width: 402px;
-  height: 3px;
-  transform: translateX(-50%);
-  border-radius: 2px;
-  background: #000;
-  filter: blur(1.2px);
-  z-index: 2;
+html[data-playing="true"] .brand-dot {
+  background: var(--el-blue);
+  box-shadow: 0 0 10px rgba(186, 214, 240, 0.78);
 }
 
+.hud-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Omarchy-style listening pill */
+.music-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--hud-border);
+  background: var(--hud-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 220ms ease, background 220ms ease, box-shadow 320ms ease;
+}
+
+.music-pill:hover {
+  border-color: var(--hud-border-hover);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.music-pill[data-playing="true"] {
+  border-color: rgba(196, 220, 242, 0.28);
+  box-shadow: 0 0 24px -6px rgba(176, 206, 234, 0.28);
+}
+
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.pill-btn:focus-visible {
+  outline: 1.5px solid var(--el-blue);
+  outline-offset: 1px;
+}
+
+.pill-play {
+  width: 26px;
+  background: rgba(255, 255, 255, 0.075);
+  color: var(--ink);
+}
+
+.pill-play:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.music-pill[data-playing="true"] .pill-play {
+  background: rgba(200, 222, 242, 0.16);
+  color: var(--el-blue);
+}
+
+.play-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(0.5px);
+}
+
+.eq-bars {
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  height: 10px;
+}
+
+.eq-bars i {
+  display: block;
+  width: 2px;
+  height: 4px;
+  border-radius: 1px;
+  background: currentColor;
+  transform-origin: bottom;
+  animation: eq-bounce 1.05s ease-in-out infinite;
+}
+
+.eq-bars i:nth-child(2) {
+  animation-delay: -0.35s;
+  height: 9px;
+}
+
+.eq-bars i:nth-child(3) {
+  animation-delay: -0.7s;
+  height: 6px;
+}
+
+@keyframes eq-bounce {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+.music-pill[data-playing="true"] .play-glyph {
+  display: none;
+}
+
+.music-pill[data-playing="true"] .eq-bars {
+  display: inline-flex;
+}
+
+.pill-track {
+  gap: 6px;
+  padding: 0 11px 0 9px;
+  max-width: 230px;
+  font-size: 12.5px;
+  line-height: 1;
+}
+
+.pill-track:hover {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.pill-title {
+  color: var(--ink);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pill-artist {
+  color: var(--ink-muted);
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+
+.pill-next {
+  width: 26px;
+  color: var(--ink-muted);
+}
+
+.pill-next:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pill-next[hidden] {
+  display: none;
+}
+
+.hud-notes-btn {
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid var(--hud-border);
+  background: var(--hud-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--ink-muted);
+  font: 500 12.5px/1 inherit;
+  cursor: pointer;
+  transition: color 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.hud-notes-btn:hover,
+.hud-notes-btn:focus-visible,
+.hud-notes-btn[aria-expanded="true"] {
+  color: var(--ink);
+  background: var(--hud-bg-hover);
+  border-color: var(--hud-border-hover);
+  outline: none;
+}
+
+/* ---- the stage & grounded set ------------------------------------------ */
 #stage {
   position: relative;
   overscroll-behavior: none;
@@ -168,60 +323,467 @@ body::after {
   z-index: 1;
 }
 
-/* ID selector outranks the UA [hidden] rule, so hide it explicitly. */
 #stage[hidden] {
   display: none;
+}
+
+.set {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 440px;
+  height: 692px;
+  transform: translate(-50%, -50%) scale(var(--set-scale, 1));
+  transform-origin: center;
+  --set-scale: 1;
+  --tilt-y: 0deg;
+  --tilt-x: 0deg;
+  --tilt-y-num: 0;
+  --sheen-x: 50%;
+}
+
+/* electroluminescent 2004 backlight spill behind the iPod screen */
+.lcd-spill {
+  position: absolute;
+  left: 50%;
+  top: 23%;
+  width: 580px;
+  height: 460px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 54% 50% at 50% 50%,
+    rgba(176, 208, 238, 0.22) 0%,
+    rgba(154, 192, 226, 0.085) 45%,
+    transparent 74%
+  );
+  filter: blur(42px);
+  opacity: 0.65;
+  transition: opacity 900ms ease, transform 900ms ease;
+}
+
+html[data-idle="true"] .lcd-spill {
+  opacity: 0.2;
+}
+
+html[data-playing="true"] .lcd-spill {
+  opacity: 1;
+  background: radial-gradient(
+    ellipse 58% 52% at 50% 50%,
+    rgba(182, 214, 244, 0.30) 0%,
+    rgba(152, 192, 232, 0.11) 48%,
+    transparent 75%
+  );
+  animation: spill-breathe 4.6s ease-in-out infinite;
+}
+
+@keyframes spill-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.88; }
+  50% { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+}
+
+/* coupled 3D chassis container: iPod + specular sheen + wear overlays move as one */
+.chassis-rig {
+  position: relative;
+  width: 440px;
+  height: 692px;
+  z-index: 2;
+  transform: perspective(1150px) rotateY(var(--tilt-y, 0deg)) rotateX(var(--tilt-x, 0deg));
+  transform-origin: 50% 62%;
+  will-change: transform;
+  transition: transform 460ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.chassis-rig.is-dragging {
+  transition: transform 48ms linear;
 }
 
 #stage web-music-ipod {
   display: block;
   touch-action: none;
-  /* drag the chassis to tilt it; the floor is a sibling, so it stays put */
-  transform: perspective(1200px) rotateY(var(--tilt-y, 0deg));
-  transform-origin: 50% 62%;
-  will-change: transform;
   cursor: grab;
-  /* The component is a container query host. With no intrinsic width it
-     collapses to 0px, so its own `width < 440px` rule forces --ipod-scale
-     to 0.75 and the device "zooms" once layout settles. Pin the width to the
-     at 440px so the query resolves at scale 1.0 (device paints 415x692). */
   width: 440px;
   height: 692px;
-  /* Edge catch only. A wide black drop-shadow here fights the key light and
-     carves a visible dark trench either side of the device. The grounded
-     shadow is drawn on the floor instead (see .floor). */
-  filter: drop-shadow(0 0 0.5px rgba(255,255,255,0.14));
+  filter: drop-shadow(0 0 0.7px rgba(255, 255, 255, 0.16));
 }
 
+.chassis-rig.is-dragging web-music-ipod {
+  cursor: grabbing;
+}
+
+/* subtle polycarbonate specular highlight reacting to tilt */
+.chassis-sheen {
+  position: absolute;
+  left: 12px;
+  right: 13px;
+  top: 2px;
+  bottom: 2px;
+  border-radius: 34px;
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(
+    112deg,
+    transparent calc(var(--sheen-x, 50%) - 34%),
+    rgba(255, 255, 255, 0.085) var(--sheen-x, 50%),
+    transparent calc(var(--sheen-x, 50%) + 34%)
+  );
+  mix-blend-mode: screen;
+  opacity: 0.7;
+}
+
+/* subtle product-retouch handling wear, mounted inside .chassis-rig */
+.wear {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.wear-tint {
+  left: 3%;
+  right: 3%;
+  top: 0.4%;
+  bottom: 0.2%;
+  background: #efe3c8;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  border-radius: 32px;
+}
+
+.wear-edge-t {
+  left: 7%;
+  right: 7%;
+  top: 0.5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.58), transparent);
+  opacity: 0.55;
+}
+
+.wear-edge-b {
+  left: 8%;
+  right: 8%;
+  bottom: 1.1%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.3), transparent);
+  opacity: 0.62;
+}
+
+.wear-smudge {
+  left: 32%;
+  top: 9%;
+  width: 26%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.28), transparent 70%);
+  opacity: 0.3;
+  filter: blur(2px);
+}
+
+/* ---- studio floor & horizon -------------------------------------------- */
+.floor {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320vw;
+  height: 44vh;
+  pointer-events: none;
+  isolation: isolate;
+  z-index: 1;
+  background: linear-gradient(180deg, var(--floor-top) 0%, #0a0a10 42%, var(--void) 100%);
+}
+
+/* seamless cyclorama horizon glow */
+.floor::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -14px;
+  height: 28px;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
+  filter: blur(6px);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 16%,
+    rgba(255, 255, 255, 0.035) 28%,
+    rgba(255, 255, 255, 0.08) 40%,
+    rgba(255, 255, 255, 0.11) 50%,
+    rgba(255, 255, 255, 0.08) 60%,
+    rgba(255, 255, 255, 0.035) 72%,
+    transparent 84%,
+    transparent 100%
+  );
+}
+
+/* grounded cast shadow + floor bounce light shifting opposite chassis tilt */
+.floor::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 476px;
+  height: 48px;
+  transform: translate(calc(-50% + var(--tilt-y-num, 0) * -1.4px), -45%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 62% 32% at 50% 74%, rgba(255, 255, 255, 0.052), transparent 70%),
+    radial-gradient(ellipse 54% 46% at 50% 22%, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.72) 38%, rgba(0, 0, 0, 0.3) 66%, transparent 100%);
+  filter: blur(9px);
+  transition: transform 280ms ease-out;
+}
+
+.floor > .occlusion {
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  width: 404px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: #000;
+  filter: blur(1.2px);
+  z-index: 2;
+}
+
+/* ---- whisper-quiet bottom hint ----------------------------------------- */
+.studio-hint {
+  position: fixed;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom, 18px));
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 10;
+  color: var(--ink-muted);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0.72;
+  transition: opacity 700ms ease;
+}
+
+.studio-hint.is-quiet {
+  opacity: 0.26;
+}
+
+.studio-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  margin: 0 1px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  font: 500 10.5px/1.3 inherit;
+  color: inherit;
+}
+
+/* ---- top-right Notes drawer -------------------------------------------- */
+.notes-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(4, 4, 6, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.notes-backdrop.is-open {
+  opacity: 1;
+}
+
+.notes-backdrop[hidden] {
+  display: none;
+}
+
+.notes-sheet {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 35;
+  width: min(440px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(14, 15, 20, 0.94);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.7);
+  transform: translateX(18px);
+  opacity: 0;
+  transition: transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1), opacity 220ms ease;
+}
+
+.notes-sheet.is-open {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.notes-sheet[hidden] {
+  display: none;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.notes-header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.notes-close {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink-muted);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font: 500 12px/1 inherit;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.notes-close:hover,
+.notes-close:focus-visible {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.notes-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 22px 26px;
+}
+
+.note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.note-item {
+  width: 100%;
+  text-align: left;
+  padding: 14px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.note-item:hover,
+.note-item:focus-visible {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.09);
+  outline: none;
+}
+
+.note-item-title {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.note-item-meta {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.note-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink-muted);
+  font: 500 12px/1 inherit;
+  cursor: pointer;
+}
+
+.note-back:hover,
+.note-back:focus-visible {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+}
+
+.note-article h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.note-article .note-meta {
+  margin: 0 0 20px;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+.note-article p {
+  margin: 0 0 16px;
+  font-size: 14.5px;
+  line-height: 1.68;
+  color: rgba(238, 240, 244, 0.84);
+  max-width: 56ch;
+}
+
+/* ---- fallback & noscript ----------------------------------------------- */
 #fallback {
   box-sizing: border-box;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 48px 24px;
-  background: #111;
+  padding: 56px 24px;
+  background: var(--void);
   font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 #fallback .fb-title {
-  margin: 0 0 40px;
+  margin: 0 0 36px;
   text-align: center;
   font-size: 20px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
 #fallback ul {
   list-style: none;
   margin: 0 auto;
   padding: 0;
-  max-width: 38rem;
+  max-width: 36rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
 }
 
 #fallback a {
-  color: #fff;
+  color: var(--ink);
   text-decoration: none;
   border-bottom: 1px solid #333;
   padding-bottom: 2px;
@@ -229,71 +791,102 @@ body::after {
 
 #fallback a:hover,
 #fallback a:focus-visible {
-  border-bottom-color: #fff;
+  border-bottom-color: var(--ink);
 }
 
-#fallback a:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 4px;
+noscript {
+  display: block;
+  max-width: 38rem;
+  margin: 64px auto;
+  padding: 0 24px;
 }
 
 noscript ul {
-  margin: 0;
+  margin: 0 0 20px;
   padding: 0;
   list-style: none;
 }
 
+noscript li {
+  margin: 8px 0;
+}
+
 noscript a {
-  color: #fff;
+  color: var(--ink);
 }
 
-/* The device is a fixed 440x692 box. Breakpoints shrink the whole .set with
-   `zoom`, which shrinks its layout box too, so a scaled device still centres
-   and the floor stays welded to its base. `scale` would keep the layout box
-   at full size and push the device off-centre inside a narrow viewport. */
-
-/* Tall viewports: use the room. 1.04 = 720px, still a product shot. */
-@media (min-height: 900px) {
-  .set { --set-scale: 1.04; }
+/* ---- responsive scale -------------------------------------------------- */
+@media (min-height: 920px) {
+  .set { --set-scale: 1.03; }
 }
 
-/* Short laptop windows: shrink to fit the 692px device plus margins. */
 @media (max-height: 860px) {
-  .set { --set-scale: 0.92; }
+  .set { --set-scale: 0.90; }
 }
 
-@media (max-height: 800px) {
-  .set { --set-scale: 0.86; }
-}
-
-@media (max-height: 720px) {
-  .set { --set-scale: 0.78; }
-}
-
-@media (max-height: 640px) {
-  .set { --set-scale: 0.68; }
-}
-
-/* Landscape phones: the height is the constraint, not the width. */
-@media (max-height: 480px) {
-  .set { --set-scale: 0.56; }
-}
-
-/* Portrait phones: 440px does not fit 390px, so the whole set shrinks.
-   0.82 * 440 = 361px, leaving a 14px gutter each side. */
-@media (max-width: 460px) {
-  /* No page scroll. The stage padding was also adding 18px beyond 100dvh,
-     which is what let the page drift under a thumb. */
-  html, body { overflow: hidden; overscroll-behavior: none; touch-action: none; }
-  #stage {
-    box-sizing: border-box;
-    padding: calc(env(safe-area-inset-top, 0px) + 18px) 0 env(safe-area-inset-bottom, 0px);
-  }
+@media (max-height: 780px) {
   .set { --set-scale: 0.82; }
 }
 
+@media (max-height: 700px) {
+  .set { --set-scale: 0.74; }
+}
+
+@media (max-height: 620px) {
+  .set { --set-scale: 0.64; }
+}
+
+@media (max-height: 480px) {
+  .set { --set-scale: 0.52; }
+}
+
+@media (max-width: 560px) {
+  .studio-hud {
+    padding: max(12px, env(safe-area-inset-top, 12px)) 14px 10px;
+  }
+  .hud-brand {
+    padding: 6px 8px;
+    font-size: 12.5px;
+  }
+  .pill-track {
+    max-width: 140px;
+    padding: 0 8px 0 6px;
+  }
+  .pill-artist {
+    display: none;
+  }
+  .studio-hint {
+    font-size: 11px;
+    bottom: max(12px, env(safe-area-inset-bottom, 12px));
+  }
+  .studio-hint .hint-keys {
+    display: none;
+  }
+  .notes-sheet {
+    top: auto;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    height: min(76dvh, 560px);
+    transform: translateY(18px);
+  }
+  .notes-sheet.is-open {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 460px) {
+  html, body {
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+  .set { --set-scale: 0.78; }
+}
+
 @media (max-width: 400px) {
-  .set { --set-scale: 0.80; }
+  .set { --set-scale: 0.74; }
 }
 
 @media (prefers-reduced-motion: reduce) {

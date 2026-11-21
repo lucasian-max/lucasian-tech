@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
-  <meta name="description" content="Mridul Vijay">
+  <meta name="theme-color" content="#060608">
+  <meta name="description" content="Mridul Vijay — 16-year-old builder in NSW, Australia. Projects, curated music, and notes inside a working 2004 iPod.">
   <title>Mridul Vijay</title>
   <link rel="canonical" href="https://lucasian.tech/">
   <meta name="robots" content="index,follow,max-image-preview:large">
@@ -14,18 +14,20 @@
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/favicon-180.png">
 
-  <link rel="modulepreload" href="includes/ipod/web-music-ipod.esm.js?v=ae47978b">
-  <link rel="stylesheet" href="styles.css?v=ae47978b">
+  <link rel="modulepreload" href="includes/ipod/web-music-ipod.esm.js?v=v2">
+  <link rel="stylesheet" href="styles.css?v=v2">
 
   <meta property="og:title" content="Mridul Vijay">
+  <meta property="og:description" content="16-year-old builder in NSW, Australia. Projects, music, and notes presented as a working 2004 iPod.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://lucasian.tech/">
   <meta property="og:image" content="https://lucasian.tech/assets/og-v2.jpg">
-  <meta property="og:image:alt" content="A white 2004 iPod on a black studio sweep, its screen showing the main menu.">
+  <meta property="og:image:alt" content="A white 2004 iPod on a dark studio sweep, its monochrome screen showing Music, Projects, About, and Contacts.">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Mridul Vijay">
+  <meta name="twitter:description" content="Projects, curated music, and notes inside a working 2004 iPod.">
   <meta name="twitter:image" content="https://lucasian.tech/assets/og-v2.jpg">
 
   <script type="application/ld+json">
@@ -33,11 +35,11 @@
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Mridul Vijay",
-    "description": "16-year-old builder in NSW, Australia. Projects, self-hosted infrastructure, and current work — presented as a working 2004 iPod.",
+    "description": "16-year-old builder in NSW, Australia. Projects, curated music, and notes presented as a working 2004 iPod.",
     "url": "https://lucasian.tech/",
     "homeLocation": { "@type": "Place", "name": "New South Wales, Australia" },
-    "knowsAbout": ["rockets", "artificial intelligence", "self-hosting", "web development"],
-    "sameAs": ["https://iammridul.me", "https://github.com/iammridul"]
+    "knowsAbout": ["rockets", "artificial intelligence", "Rust", "web development"],
+    "sameAs": ["https://iammridul.me", "https://github.com/lucasian-max"]
   }
   </script>
   <script type="application/ld+json">
@@ -47,67 +49,102 @@
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Black Hole",
         "url": "https://iammridul.me/blackhole-pixel/blackhole-pixel.html" },
-      { "@type": "ListItem", "position": 2, "name": "lucasian.tech",
-        "url": "https://lucasian.tech" },
+      { "@type": "ListItem", "position": 2, "name": "handwritten2pdf",
+        "url": "https://github.com/lucasian-max/handwritten2pdf" },
       { "@type": "ListItem", "position": 3, "name": "Study log",
-        "url": "https://study.iammridul.me" }
+        "url": "https://study.iammridul.me" },
+      { "@type": "ListItem", "position": 4, "name": "Spotify Display",
+        "url": "https://github.com/lucasian-max/Spotify-Display" }
     ]
   }
   </script>
 
-  <script src="app.js?v=ae47978b"></script>
-  <script type="module" src="includes/ipod/web-music-ipod.esm.js?v=ae47978b"></script>
+  <script src="posts.js?v=v2"></script>
+  <script src="app.js?v=v2"></script>
+  <script type="module" src="includes/ipod/web-music-ipod.esm.js?v=v2"></script>
 </head>
 <body>
+  <header class="studio-hud" aria-label="Studio controls">
+    <button type="button" class="hud-brand" id="brand-home" title="Return to iPod root menu">
+      <span class="brand-dot" aria-hidden="true"></span>
+      <span class="brand-name">Mridul Vijay</span>
+    </button>
+
+    <div class="hud-actions">
+      <div class="music-pill" id="music-pill" data-playing="false" data-loaded="false">
+        <button type="button" class="pill-btn pill-play" id="music-toggle" aria-label="Play studio ambient music">
+          <span class="play-glyph" aria-hidden="true">
+            <svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor"><path d="M2.5 1.75v8.5L10 6z"/></svg>
+          </span>
+          <span class="eq-bars" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+        </button>
+        <button type="button" class="pill-btn pill-track" id="music-track" title="Open Now Playing on iPod">
+          <span class="pill-title" id="music-title">Studio Ambient</span>
+          <span class="pill-artist" id="music-artist">Play</span>
+        </button>
+        <button type="button" class="pill-btn pill-next" id="music-next" aria-label="Next track" title="Next track" hidden>
+          <svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M2 2.2v7.6L7.6 6 2 2.2zm6.4 0H10v7.6H8.4V2.2z"/></svg>
+        </button>
+      </div>
+
+      <button type="button" class="hud-notes-btn" id="notes-toggle" aria-expanded="false" aria-controls="notes-sheet">
+        Notes
+      </button>
+    </div>
+  </header>
+
   <main id="stage">
-    <h1 class="sr-only">lucasian</h1>
-    <div class="set">
-      <web-music-ipod id="ipod" aria-label="Portfolio navigation"></web-music-ipod>
+    <h1 class="sr-only">Mridul Vijay — interactive 2004 iPod portfolio</h1>
+    <div class="set" id="ipod-set">
+      <div class="lcd-spill" id="lcd-spill" aria-hidden="true"></div>
+      <div class="chassis-rig" id="chassis-rig">
+        <web-music-ipod id="ipod" aria-label="Portfolio navigation"></web-music-ipod>
+        <div class="chassis-sheen" aria-hidden="true"></div>
+      </div>
       <div class="floor" aria-hidden="true"><div class="occlusion"></div></div>
     </div>
+    <p class="studio-hint" id="studio-hint" aria-live="polite">
+      Click a row, scroll, or spin the wheel<span class="hint-keys"> &nbsp;&middot;&nbsp; <kbd>&uarr;</kbd><kbd>&darr;</kbd> <kbd>Enter</kbd> <kbd>Esc</kbd></span>
+    </p>
   </main>
 
+  <div class="notes-backdrop" id="notes-backdrop" hidden></div>
+  <aside class="notes-sheet" id="notes-sheet" role="dialog" aria-modal="true" aria-labelledby="notes-heading" hidden>
+    <div class="notes-header">
+      <h2 id="notes-heading">Notes</h2>
+      <button type="button" class="notes-close" id="notes-close" aria-label="Close notes">Close</button>
+    </div>
+    <div class="notes-body" id="notes-body"></div>
+  </aside>
+
   <noscript>
-    <h2>Mridul Vijay — portfolio, in text</h2>
-    <p>I'm 16, in NSW, Australia. I build rockets and AI, and I run my own server.
-       This site is a working 2004 iPod; everything below is what its click wheel reaches.</p>
+    <h2>Mridul Vijay — portfolio</h2>
+    <p>16-year-old builder in NSW, Australia. I make web tools, explore rockets and AI, and learn Rust.
+       This site is a working 2004 iPod; JavaScript enables the click wheel and music player.</p>
     <h3>Projects</h3>
     <ul>
       <li><a href="https://iammridul.me/blackhole-pixel/blackhole-pixel.html">Black Hole</a> — a pixel-art black hole you can fall into.</li>
-      <li><a href="https://lucasian.tech">lucasian.tech</a> — this portfolio, as a web-component iPod.</li>
-    </ul>
-    <h3>Running</h3>
-    <ul>
-      <li><a href="https://music.lucasian.tech">Navidrome</a></li>
-      <li><a href="https://library.lucasian.tech">Kavita</a></li>
-      <li><a href="https://audiobooks.lucasian.tech">Audiobooks</a></li>
-      <li><a href="https://books.lucasian.tech">Books</a></li>
-      <li><a href="https://usage.lucasian.tech">Usage</a></li>
-      <li><a href="https://karakeep.lucasian.tech">Karakeep</a></li>
-      <li><a href="https://timer.lucasian.tech">Timer</a></li>
-      <li><a href="https://study.lucasian.tech">Study</a></li>
-      <li><a href="https://tasks.lucasian.tech">Tasks</a></li>
-      <li><a href="https://manga.lucasian.tech">Manga</a></li>
+      <li><a href="https://github.com/lucasian-max/handwritten2pdf">handwritten2pdf</a> — turn photos of handwritten notes into compiled LaTeX/PDF.</li>
+      <li><a href="https://study.iammridul.me">Study log</a> — minimal dashboard backed by Google Sheets.</li>
+      <li><a href="https://github.com/lucasian-max/Spotify-Display">Spotify Display</a> — live currently-playing display.</li>
     </ul>
     <h3>Contact</h3>
-    <p><a href="mailto:hey@lucasian.tech">hey@lucasian.tech</a> ·
-       <a href="https://github.com/iammridul">GitHub</a> ·
+    <p><a href="mailto:hey@lucasian.tech">hey@lucasian.tech</a> &middot;
+       <a href="https://github.com/lucasian-max">GitHub</a> &middot;
        <a href="https://iammridul.me">iammridul.me</a></p>
   </noscript>
 
   <div id="fallback" hidden>
-    <p class="fb-title">lucasian</p>
+    <p class="fb-title">Mridul Vijay</p>
     <ul>
-      <li><a href="https://music.lucasian.tech">Navidrome</a></li>
-      <li><a href="https://library.lucasian.tech">Kavita</a></li>
-      <li><a href="https://audiobooks.lucasian.tech">Audiobooks</a></li>
-      <li><a href="https://books.lucasian.tech">Books</a></li>
-      <li><a href="https://usage.lucasian.tech">Usage</a></li>
-      <li><a href="https://karakeep.lucasian.tech">Karakeep</a></li>
-      <li><a href="https://timer.lucasian.tech">Timer</a></li>
-      <li><a href="https://study.lucasian.tech">Study</a></li>
-      <li><a href="https://tasks.lucasian.tech">Tasks</a></li>
-      <li><a href="https://manga.lucasian.tech">Manga</a></li>
+      <li><a href="https://iammridul.me/blackhole-pixel/blackhole-pixel.html">Black Hole</a></li>
+      <li><a href="https://github.com/lucasian-max/handwritten2pdf">handwritten2pdf</a></li>
+      <li><a href="https://study.iammridul.me">Study log</a></li>
+      <li><a href="https://github.com/lucasian-max/Spotify-Display">Spotify Display</a></li>
+      <li><a href="https://github.com/lucasian-max">GitHub</a></li>
+      <li><a href="mailto:hey@lucasian.tech">hey@lucasian.tech</a></li>
     </ul>
   </div>
 </body>
