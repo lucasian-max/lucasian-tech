@@ -1341,11 +1341,14 @@ const Rs = {
   "ASE.Web.IPod.Status.Loading": "Loading",
   "ASE.Web.IPod.Status.Ready": "Ready",
   "ASE.Web.IPod.Error.NotConnected": "You are not connected to the internet",
+  "Portfolio.SelfHosted": "Self-Hosted",
+  "Portfolio.Projects": "Projects",
+  "Portfolio.Now": "Now Playing",
+  "Portfolio.About": "About",
+  "Portfolio.Contacts": "Contacts",
   "Portfolio.Music": "Music",
   "Portfolio.Audiobooks": "Audiobooks",
-  "Portfolio.Projects": "Projects",
-  "Portfolio.Apps": "Apps",
-  "Portfolio.About": "About"
+  "Portfolio.Apps": "Apps"
 }, bl = le("i18n");
 function Ws(e, t) {
   return t ? e.replace(
@@ -1929,7 +1932,7 @@ function $l(e) {
   function g(w, E) {
     if (
       /*item*/
-      w[10].action === "info" && /*item*/
+      (w[10].action === "info" || w[10].action === "link") && /*item*/
       w[10].value
     ) return fo;
     if (
@@ -4236,14 +4239,14 @@ function ol(e, t, i) {
   return { id: e, title: t, action: "inline-toggle", toggleKey: e, values: i };
 }
 function Sh({ i18n: e, hasNowPlaying: t }) {
-  const L = (n, u) => ({ id: "l-" + n, title: e.t(n), action: "link", url: u });
+  // Four rows, matching the 2004 root menu's shape: one list of services, one
+  // list of projects, one live screen, and About (which still holds the Brick
+  // easter egg on a long centre-press).
   return [
-    L("Portfolio.Music", "https://music.lucasian.tech"),
-    L("Portfolio.Audiobooks", "https://audiobooks.lucasian.tech"),
     Ee("projects", e),
-    Ee("apps", e),
+    Ee("self-hosted", e),
     Ee("about", e),
-    Ee("settings", e),
+    Ee("contacts", e),
     ...t ? [Ee("now-playing", e)] : []
   ];
 }
@@ -4289,35 +4292,53 @@ function _h({ i18n: e }) {
   ];
 }
 function Ch({ data: e, i18n: t }) {
-  const i = (l) => t.formatNumber(l, { style: "unit", unit: "gigabyte" });
-  return [
-    // Product names are typically not localized.
-    { id: "ipod", title: "iPod", action: "info", centered: !0 },
-    {
-      id: "songs-count",
-      title: t.t("ASE.Web.IPod.About.Songs"),
+  // The About screen is owned by the site, not the component: everything comes
+  // from window.__SITE.about so the copy can change without touching the bundle.
+  // Rows are ordered name, facts, links, then the device trivia.
+  var A = (window.__SITE && window.__SITE.about) || {};
+  var rows = [
+    { id: "me", title: A.name || "iPod", action: "info", centered: !0 }
+  ];
+  (A.facts || []).forEach(function (f, i) {
+    if (!f || !f.title) return;
+    rows.push({
+      id: "fact-" + i,
+      title: f.title,
       action: "info",
-      value: t.formatNumber((e == null ? void 0 : e.songs.length) ?? 0)
-    },
-    {
+      value: f.value == null ? "" : String(f.value)
+    });
+  });
+  (A.links || []).forEach(function (l, i) {
+    if (!l || !l.title || !/^https?:\/\//.test(l.url || "")) return;
+    rows.push({ id: "link-" + i, title: l.title, action: "link", url: l.url });
+  });
+  var D = A.device || {};
+  var gb = function (v) {
+    return t.formatNumber(v, { style: "unit", unit: "gigabyte" });
+  };
+  if (D.capacity != null) {
+    rows.push({
       id: "capacity",
       title: t.t("ASE.Web.IPod.About.Capacity"),
       action: "info",
-      value: i(9.2)
-    },
-    {
+      value: gb(D.capacity)
+    });
+  }
+  if (D.available != null) {
+    rows.push({
       id: "available",
       title: t.t("ASE.Web.IPod.About.Available"),
       action: "info",
-      value: i(4.5)
-    },
-    {
-      id: "version",
-      title: t.t("ASE.Web.IPod.About.Version"),
-      action: "info",
-      value: "2644.1.0"
-    }
-  ];
+      value: gb(D.available)
+    });
+  }
+  rows.push({
+    id: "version",
+    title: t.t("ASE.Web.IPod.About.Version"),
+    action: "info",
+    value: D.version || "2644.1.0"
+  });
+  return rows;
 }
 function Bh({ data: e, i18n: t }) {
   const i = ((e == null ? void 0 : e.playlists) ?? []).map((l) => ({
@@ -4362,15 +4383,90 @@ function hl(e) {
 }
 function Ad(e) {
   const t = ((window.__SITE && window.__SITE[e]) || []).filter(
-    (i) => i && i.title && /^https?:\/\//.test(i.url)
+    (i) => i && i.title && /^(https?:\/\/|mailto:)/.test(i.url)
   );
-  return t.length ? t.map((i) => ({ id: "s-" + i.title, title: i.title, action: "link", url: i.url })) : [{ id: "empty", title: "Nothing yet", action: "info", centered: !0 }];
+  return t.length ? t.map((i) => {
+    const row = { id: "s-" + i.title, title: i.title, action: "link", url: i.url };
+    if (i.value) row.value = i.value;
+    return row;
+  }) : [{ id: "empty", title: "Nothing yet", action: "info", centered: !0 }];
+}
+// The "Now" screen: one random item from the archive, re-rolled by pressing
+// the centre button. Items can be links or plain info rows; the pool is baked
+// into window.__SITE at deploy time so this never needs a network round trip.
+function Au() {
+  var pool = (window.__SITE && window.__SITE.now) || [];
+  pool = pool.filter(function (i) { return i && i.title; });
+  if (!pool.length) {
+    return [{ id: "empty", title: "Nothing yet", action: "info", centered: !0 }];
+  }
+  function pick() {
+    var n = Math.floor(Math.random() * pool.length);
+    var it = pool[n];
+    var row = { id: "now-" + n, title: it.title, action: it.url ? "link" : "info" };
+    if (it.url) row.url = it.url;
+    if (it.value) row.value = it.value;
+    return row;
+  }
+  var first = pick();
+  return [first].concat(
+    pool.filter(function (_, i) { return i !== pool.indexOf(pool.find(function (x) { return x.title === first.title; })); })
+        .slice(0, 3)
+        .map(function (it, i) {
+          var row = { id: "nowx-" + i, title: it.title, action: it.url ? "link" : "info" };
+          if (it.url) row.url = it.url;
+          if (it.value) row.value = it.value;
+          return row;
+        })
+  );
+}
+function ShGroups() {
+  var list = (window.__SITE && window.__SITE.selfHosted) || [];
+  var order = ["Server", "Media", "Reading", "Tools"];
+  var counts = {};
+  list.forEach(function (i) { if (i && i.group) counts[i.group] = (counts[i.group] || 0) + 1; });
+  var srv = (window.__SITE && window.__SITE.server) || {};
+  counts.Server = srv.services != null ? srv.services : list.length;
+  return order.filter(function (g) { return counts[g]; }).map(function (g) {
+    /* No value: the component gives navigate rows a chevron and nothing else.
+       The numbers live on the Server screen, where info rows render them. */
+    return {
+      id: "shg-" + g,
+      title: g,
+      action: "navigate",
+      target: "sh-" + g.toLowerCase()
+    };
+  });
+}
+function ShGroup(name) {
+  var list = ((window.__SITE && window.__SITE.selfHosted) || []).filter(function (i) {
+    return i && i.group === name;
+  });
+  if (!list.length) return [{ id: "empty", title: "Nothing here", action: "info", centered: !0 }];
+  return list.map(function (i) {
+    var row = { id: "s-" + i.title, title: i.title, action: i.url ? "link" : "info" };
+    if (i.url) row.url = i.url;
+    if (i.purpose) row.value = i.purpose;
+    return row;
+  });
+}
+function ShServer() {
+  var srv = (window.__SITE && window.__SITE.server) || {};
+  var list = (window.__SITE && window.__SITE.selfHosted) || [];
+  var rows = [];
+  var n = srv.services != null ? srv.services : list.length;
+  if (n) rows.push({ id: "srv-s", title: "Services", action: "info", value: String(n) });
+  if (srv.domains != null) rows.push({ id: "srv-d", title: "Domains", action: "info", value: String(srv.domains) });
+  if (srv.servers != null) rows.push({ id: "srv-h", title: "Servers", action: "info", value: String(srv.servers) });
+  if (srv.uptime != null) rows.push({ id: "srv-u", title: "Uptime", action: "info", value: String(srv.uptime) });
+  if (srv.backup != null) rows.push({ id: "srv-b", title: "Backup", action: "info", value: String(srv.backup) });
+  return rows.length ? rows : [{ id: "empty", title: "Nothing here", action: "info", centered: !0 }];
 }
 const gn = {
   main: {
     view: "list",
     // Product names are usually not localized.
-    title: () => "iPod",
+    title: () => "Mridul Vijay",
     items: Sh,
     listsNowPlaying: !0
   },
@@ -4434,7 +4530,14 @@ const gn = {
     titleKey: "ASE.Web.IPod.Menu.NowPlaying",
     blocksIdleJump: !0
   },
+  contacts: { view: "list", titleKey: "Portfolio.Contacts", items: () => Ad("contacts") },
   projects: { view: "list", titleKey: "Portfolio.Projects", items: () => Ad("projects") },
+  "self-hosted": { view: "list", titleKey: "Portfolio.SelfHosted", items: () => ShGroups() },
+  "sh-server": { view: "list", title: () => "Server", items: () => ShServer() },
+  "sh-media": { view: "list", title: () => "Media", items: () => ShGroup("Media") },
+  "sh-reading": { view: "list", title: () => "Reading", items: () => ShGroup("Reading") },
+  "sh-tools": { view: "list", title: () => "Tools", items: () => ShGroup("Tools") },
+  now: { view: "list", titleKey: "Portfolio.Now", items: Au },
   apps: { view: "list", titleKey: "Portfolio.Apps", items: () => Ad("apps") },
   brick: {
     view: "brick",
@@ -5120,7 +5223,27 @@ function Fh(e, t, i) {
   function we(b) {
     if (h.length === 0)
       return !1;
-    const Z = Math.min(h.length - 1, Math.max(0, Q + b)), At = Z !== Q;
+    /* Selection may only land on something you can actually press. On a screen
+       whose rows are all inert (About, Server) the wheel stops dead instead of
+       dragging an invisible highlight through dead rows. */
+    const ok = (x) => h[x] && h[x].action !== "info";
+    let any = !1;
+    for (let j = 0; j < h.length; j++) if (ok(j)) { any = !0; break; }
+    if (!any) {
+      /* nothing pressable: freeze if it all fits, but a list longer than the
+         screen still has to scroll (the Status screen is ten rows) */
+      if (h.length <= 6) return !1;
+      const Z2 = Math.min(h.length - 1, Math.max(0, Q + b));
+      const At2 = Z2 !== Q;
+      return i(7, Q = Z2), At2 && i(48, Lt = !0), At2;
+    }
+    let Z = Q;
+    for (let step = 0; step < h.length; step++) {
+      Z = Math.min(h.length - 1, Math.max(0, Z + b));
+      if (ok(Z) || Z === Q) break;
+    }
+    if (!ok(Z)) return !1;
+    const At = Z !== Q;
     return i(7, Q = Z), At && i(48, Lt = !0), At;
   }
   function he(b, Z) {

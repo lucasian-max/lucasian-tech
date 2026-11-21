@@ -1,17 +1,11 @@
-@font-face {
-  font-family: "SF Pro";
-  src: url("assets/fonts/sf-pro/SFPro.woff2") format("woff2-variations");
-  font-weight: 1 1000;
-  font-style: normal;
-  font-display: swap;
-}
-
 html,
 body {
   margin: 0;
-  background: #000;
+  /* Not #000: a pure black field makes every shadow mathematically invisible,
+     which is why the device read as a floating image. */
+  background: #08080a;
   color: #fff;
-  font-family: "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -34,13 +28,144 @@ html {
 body {
   min-height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* ---- the set ------------------------------------------------------------
+   A 2004 product shot is a seamless studio sweep, not a wooden desk. The
+   floor is a child of .set, so the horizon is pinned to the device's own
+   base at every viewport size instead of drifting with a vh percentage. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 62% 44% at 50% 2%, rgba(255,251,240,0.075), transparent 70%),
+    linear-gradient(180deg, #101014 0%, #0b0b0f 44%, #08080a 72%, #050507 100%);
+}
+
+/* a 3% dither field: 8-bit radial gradients band visibly on near-black */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.set {
+  /* Absolutely centred rather than grid-centred: a grid item wider than its
+     column clamps to the start edge instead of centring, which pushed the
+     440px set 25px right on a 390px phone. */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  /* Fixed geometry: the device is 440x692 here and the floor starts at its
+     bottom edge. Breakpoints scale .set as a whole with `zoom`, so layout
+     pixels (and therefore the floor's anchor) shrink with it. Scaling the
+     host instead would trip the component's own container query and
+     double-shrink the device. */
+  width: 440px;
+  height: 692px;
+  /* Scaled, not zoomed: `zoom` changes the layout width, which trips the
+     component's own `width < 440px` container query and shrinks the device
+     again — leaving a gap between its base and the floor. `scale` keeps the
+     layout box at 440x692 so the device never changes size internally. */
+  transform: translate(-50%, -50%) scale(var(--set-scale, 1));
+  transform-origin: center;
+  --set-scale: 1;
+}
+
+/* Everything that has to know where the device base is hangs off .floor.
+   It is absolutely placed at top:100% of .set, so its top edge IS the
+   device's base edge at every viewport size — no vh arithmetic to drift. */
+.floor {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  /* Oversized so it still spans the viewport after .set is scaled down. */
+  width: 300vw;
+  height: 42vh;
+  pointer-events: none;
+  background: linear-gradient(180deg, #0e0e14 0%, #0a0a0f 44%, #050507 100%);
+}
+
+/* the horizon: the single line that turns the lateral void into a room.
+   Fades outward, so it runs unbroken under the device and dies at the
+   viewport edges rather than stopping short of the corners. */
+.floor::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -13px;
+  height: 26px;
+  /* A hairline reads as a CSS border. A wide, low-opacity band centred on the
+     base reads as the light catching a seamless cyclorama. */
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
+  filter: blur(5px);
+  background: linear-gradient(90deg,
+    transparent 0%, transparent 18%,
+    rgba(255,255,255,0.035) 30%, rgba(255,255,255,0.075) 40%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.075) 60%, rgba(255,255,255,0.035) 70%,
+    transparent 82%, transparent 100%);
+}
+
+/* Grounded shadow, drawn ON the floor: a near-black occlusion line hugging
+   the base, then a squash-and-blur cast shadow spilling forward, then a faint
+   bounce light so the floor reads as a surface rather than a void. */
+.floor::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 470px;
+  height: 46px;
+  transform: translate(-50%, -46%);
+  border-radius: 50%;
+  background:
+    /* bounce light, just under the base */
+    radial-gradient(ellipse 62% 30% at 50% 74%, rgba(255,255,255,0.045), transparent 70%),
+    /* the cast shadow, spilling forward onto the floor */
+    radial-gradient(ellipse 54% 46% at 50% 22%, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.72) 38%, rgba(0,0,0,0.30) 66%, transparent 100%);
+  filter: blur(9px);
+}
+
+/* a razor occlusion line where the chassis meets the floor */
+.floor {
+  isolation: isolate;
+}
+.floor > .occlusion {
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  width: 402px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: #000;
+  filter: blur(1.2px);
+  z-index: 2;
 }
 
 #stage {
+  position: relative;
+  overscroll-behavior: none;
+  overflow: hidden;
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
   place-items: center;
+  z-index: 1;
 }
 
 /* ID selector outranks the UA [hidden] rule, so hide it explicitly. */
@@ -48,14 +173,24 @@ body {
   display: none;
 }
 
-/* The host must be as wide as the device, not shrink-to-fit. At width 0 the
-   component's own `@container ipod (width < 360px)` rule sets --ipod-scale to
-   0.75, so it renders small and then "zooms" once the viewport settles. */
 #stage web-music-ipod {
   display: block;
+  touch-action: none;
+  /* drag the chassis to tilt it; the floor is a sibling, so it stays put */
+  transform: perspective(1200px) rotateY(var(--tilt-y, 0deg));
+  transform-origin: 50% 62%;
+  will-change: transform;
+  cursor: grab;
+  /* The component is a container query host. With no intrinsic width it
+     collapses to 0px, so its own `width < 440px` rule forces --ipod-scale
+     to 0.75 and the device "zooms" once layout settles. Pin the width to the
+     at 440px so the query resolves at scale 1.0 (device paints 415x692). */
   width: 440px;
-  min-height: 692px;
-  transform-origin: center;
+  height: 692px;
+  /* Edge catch only. A wide black drop-shadow here fights the key light and
+     carves a visible dark trench either side of the device. The grounded
+     shadow is drawn on the floor instead (see .floor). */
+  filter: drop-shadow(0 0 0.5px rgba(255,255,255,0.14));
 }
 
 #fallback {
@@ -112,54 +247,53 @@ noscript a {
   color: #fff;
 }
 
-/* The device has a fixed 692px height, and `scale` shrinks it visually without
-   shrinking its layout box. Negative block margins reclaim that space so the
-   device never overflows a short viewport. margin = -(692 * (1 - scale) / 2). */
+/* The device is a fixed 440x692 box. Breakpoints shrink the whole .set with
+   `zoom`, which shrinks its layout box too, so a scaled device still centres
+   and the floor stays welded to its base. `scale` would keep the layout box
+   at full size and push the device off-centre inside a narrow viewport. */
+
+/* Tall viewports: use the room. 1.04 = 720px, still a product shot. */
+@media (min-height: 900px) {
+  .set { --set-scale: 1.04; }
+}
+
+/* Short laptop windows: shrink to fit the 692px device plus margins. */
+@media (max-height: 860px) {
+  .set { --set-scale: 0.92; }
+}
+
 @media (max-height: 800px) {
-  #stage web-music-ipod {
-    scale: 0.84;
-    margin: -55px 0;
-  }
+  .set { --set-scale: 0.86; }
 }
 
-@media (max-height: 700px) {
-  #stage web-music-ipod {
-    scale: 0.74;
-    margin: -90px 0;
-  }
+@media (max-height: 720px) {
+  .set { --set-scale: 0.78; }
 }
 
-@media (max-height: 620px) {
-  #stage web-music-ipod {
-    scale: 0.64;
-    margin: -125px 0;
-  }
+@media (max-height: 640px) {
+  .set { --set-scale: 0.68; }
 }
 
+/* Landscape phones: the height is the constraint, not the width. */
 @media (max-height: 480px) {
-  body {
-    overflow: auto;
-  }
-
-  #stage web-music-ipod {
-    scale: 0.55;
-    margin: -156px 0;
-  }
+  .set { --set-scale: 0.56; }
 }
 
-@media (max-width: 700px) {
-  body {
-    overflow: auto;
-  }
-
+/* Portrait phones: 440px does not fit 390px, so the whole set shrinks.
+   0.82 * 440 = 361px, leaving a 14px gutter each side. */
+@media (max-width: 460px) {
+  /* No page scroll. The stage padding was also adding 18px beyond 100dvh,
+     which is what let the page drift under a thumb. */
+  html, body { overflow: hidden; overscroll-behavior: none; touch-action: none; }
   #stage {
-    padding: 24px 0;
+    box-sizing: border-box;
+    padding: calc(env(safe-area-inset-top, 0px) + 18px) 0 env(safe-area-inset-bottom, 0px);
   }
+  .set { --set-scale: 0.82; }
+}
 
-  #stage web-music-ipod {
-    scale: 0.82;
-    margin: -62px 0;
-  }
+@media (max-width: 400px) {
+  .set { --set-scale: 0.80; }
 }
 
 @media (prefers-reduced-motion: reduce) {
