@@ -1,5 +1,3 @@
-// Time-to-menu: how long until a real visitor can see navigation rows?
-// Run: node tests/ttm.mjs
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";

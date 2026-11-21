@@ -1,23 +1,4 @@
 #!/usr/bin/env node
-/**
- * Sync Mridul's Navidrome library (music.lucasian.tech) into the static iPod
- * catalog (includes/ipod/data/us/en-US.json and index.json).
- *
- * Security model:
- *   Never exposes Navidrome credentials or music.lucasian.tech URLs in the
- *   public browser bundle. Instead, this script reads top-played tracks from
- *   Navidrome at build time (via Subsonic API env vars OR read-only SSH to
- *   node1's navidrome.db), resolves each track to Apple's public CORS-enabled
- *   preview CDN, verifies HTTP 200 on every URL, and pairs the result with the
- *   local full-length Studio Ambient loop.
- *
- * Usage:
- *   # Mode 1: Subsonic API (https://www.navidrome.org/docs/developers/subsonic-api/)
- *   NAVIDROME_URL=https://music.lucasian.tech NAVIDROME_USER=... NAVIDROME_PASS=... node scripts/sync-navidrome.mjs
- *
- *   # Mode 2: Local fleet SSH read from node1 (default on omarchy)
- *   node scripts/sync-navidrome.mjs
- */
 
 import { createHash, randomBytes } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -163,7 +144,6 @@ function selectBalancedTracks(rawTracks) {
     return true;
   });
 
-  // Pass 1: top played from Mridul's actual Navidrome history (max 3 per artist)
   for (const t of candidates) {
     if (picked.length >= 10) break;
     const key = `${norm(t.artist)}::${norm(t.title)}`;
@@ -175,7 +155,6 @@ function selectBalancedTracks(rawTracks) {
     picked.push(t);
   }
 
-  // Pass 2: ensure signature artists from his Navidrome library are represented
   const signature = [
     { artist: "Deftones", title: "Change (In the House of Flies)", album: "White Pony", playCount: 2 },
     { artist: "Daft Punk", title: "Veridis Quo", album: "Discovery", playCount: 1 },
@@ -277,7 +256,6 @@ async function main() {
     ...resolved.map(({ playCount, ...song }) => song),
   ];
 
-  // Build artist index sorted alphabetically
   const artistMap = new Map();
   for (const s of songs) {
     const list = artistMap.get(s.artistName) || [];
@@ -292,7 +270,6 @@ async function main() {
       songIds,
     }));
 
-  // 3 focused playlists grounded in Mridul's real listening history
   const ambientIds = [
     LOCAL_SONG.id,
     ...resolved.filter((s) => CHILL_ARTISTS.has(norm(s.artistName))).slice(0, 4).map((s) => s.id),

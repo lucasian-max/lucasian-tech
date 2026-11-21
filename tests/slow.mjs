@@ -1,7 +1,3 @@
-/* Slow-load test: a 9s module download must show the device, not the link list.
-   This is the case that broke in Firefox — a fixed 6s timer cannot tell
-   "slow" from "broken", so the fallback used to replace a working page.
-   Run: node tests/slow.mjs   (needs tests/serve.py on 8100, which can delay) */
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -83,7 +79,6 @@ const read = async () => {
 
 console.log(`\nslow: ${URL_}\n`);
 
-// Module is delayed 9s. Sample at 3s, 7s and 11s.
 await sleep(3000);
 const at3 = await read();
 ok("t=3s (module still downloading) shows the device", at3.stageDisplay === "grid" && at3.fallbackDisplay === "none", JSON.stringify(at3));

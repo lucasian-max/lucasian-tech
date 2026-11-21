@@ -1,5 +1,3 @@
-// Why does the device appear to zoom on load?
-// Samples the host width and the component's internal --ipod-scale over time.
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";

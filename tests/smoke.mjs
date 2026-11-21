@@ -1,5 +1,3 @@
-/* Smoke test: loads the page in headless Chromium, drives the iPod wheel through
-   every root menu row, and asserts what each row does. No dependencies (CDP + WebSocket). */
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -73,7 +71,6 @@ const evaluate = async (expr) => {
 
 console.log(`\nsmoke: ${URL}\n`);
 
-// --- shape of the root menu -------------------------------------------------
 const rows = await evaluate(`(() => {
   const el = document.querySelector('web-music-ipod');
   if (!el || !el.shadowRoot) return { error: 'no shadow root' };
@@ -89,14 +86,12 @@ const expect = ["Music", "Audiobooks", "Projects", "Apps", "About", "Settings"];
 const got = (rows.texts || []).filter((x) => expect.includes(x));
 ok("root menu shows all 6 rows", expect.every((e) => got.includes(e)), JSON.stringify(rows.texts));
 
-// --- data source ------------------------------------------------------------
 const site = await evaluate(`JSON.stringify({
   projects: (window.__SITE?.projects || []).length,
   apps: (window.__SITE?.apps || []).length
 })`);
 ok("window.__SITE is populated", site === '{"projects":6,"apps":8}', site);
 
-// --- scrolling the wheel selects a row --------------------------------------
 const wheelWorks = await evaluate(`(() => {
   const el = document.querySelector('web-music-ipod');
   const r = el.shadowRoot;
@@ -105,7 +100,6 @@ const wheelWorks = await evaluate(`(() => {
 })()`);
 ok("click wheel is present and sized", wheelWorks === true);
 
-// --- fallback link list is real ---------------------------------------------
 const fb = await evaluate(`(() => {
   const f = document.querySelector('#fallback');
   if (!f) return { error: 'missing' };
@@ -115,13 +109,11 @@ const fb = await evaluate(`(() => {
 ok("fallback exists and is hidden by default", fb.hidden === true, JSON.stringify(fb));
 ok("fallback has real https links", fb.count > 0 && fb.allHttps === true, JSON.stringify(fb));
 
-// --- no external network ----------------------------------------------------
 const ORIGIN = new globalThis.URL(URL).origin;
 const ext = await evaluate(`performance.getEntriesByType('resource')
   .map(r => r.name).filter(n => !n.startsWith('${ORIGIN}'))`);
 ok("zero external requests", Array.isArray(ext) && ext.length === 0, JSON.stringify(ext));
 
-// --- page is actually black -------------------------------------------------
 const bg = await evaluate(`getComputedStyle(document.body).backgroundColor`);
 ok("body is black", bg === "rgb(0, 0, 0)", bg);
 

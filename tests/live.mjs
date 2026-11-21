@@ -1,5 +1,3 @@
-// Live-site check: does lucasian.tech render the 6-row iPod menu end to end?
-// Run: node tests/live.mjs
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -117,7 +115,7 @@ ok("rows are the expected labels", JSON.stringify(last?.rows) === JSON.stringify
 ok("screen has a real size", last?.screen && last.screen[0] > 100 && last.screen[1] > 80, JSON.stringify(last?.screen));
 ok("no console errors", errors.length === 0, errors.slice(0, 3).join(" | "));
 
-await sleep(1200); // let the boot fade finish before the screenshot
+await sleep(1200);
 const shot = await send("Page.captureScreenshot", { format: "png" }, S);
 if (shot.result?.data) {
   const { writeFileSync } = await import("node:fs");

@@ -1,5 +1,3 @@
-/* Fallback test: blocks the iPod module and asserts the plain-link list appears.
-   Run: node tests/fallback.mjs   (needs a static server on 8099) */
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -59,7 +57,6 @@ await send("Runtime.enable", {}, S);
 await send("Network.enable", {}, S);
 await send("Page.enable", {}, S);
 
-// Kill the component module before anything else loads.
 await send("Network.setBlockedURLs", { urls: ["*web-music-ipod.esm.js*"] }, S);
 await send("Page.navigate", { url: URL_ }, S);
 await sleep(1200);
@@ -95,7 +92,7 @@ console.log(`\nfallback: ${URL_}\n`);
 const early = await read();
 ok("stage takes no space while the module is blocked", early.stageRect === 0 || early.stageDisplay === "none", JSON.stringify(early));
 
-await sleep(5200); // let the 6s timer from page start elapse
+await sleep(5200);
 const late = await read();
 ok("stage is hidden after the timeout", late.stageDisplay === "none", JSON.stringify(late));
 ok("fallback is visible", late.fallbackDisplay !== "none", JSON.stringify(late));

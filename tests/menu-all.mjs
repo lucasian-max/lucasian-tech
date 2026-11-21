@@ -1,6 +1,3 @@
-/* Walk every root menu row on the deployed site with real key events.
-   Synthetic clicks do not move the wheel; only key/pointer events do.
-   Run: node tests/menu-all.mjs */
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -101,7 +98,6 @@ const focus = () =>
 
 await send("Page.navigate", { url: URL_ }, S);
 
-// wait for the element to exist, then for boot to finish
 for (let i = 0; i < 100; i++) {
   if (await evaluate(`!!document.querySelector('web-music-ipod')`)) break;
   await sleep(100);
@@ -119,16 +115,13 @@ console.log(`\nmenu-all: ${URL_}\n`);
 ok("root menu has 6 rows", root?.rows?.length === 6, JSON.stringify(root?.rows));
 
 const want = ["Music", "Audiobooks", "Projects", "Apps", "About", "Settings"];
-// Projects/Apps/About/Settings open an internal screen; Music/Audiobooks leave the site.
 const internal = ["Projects", "Apps", "About", "Settings"];
 
 for (const name of internal) {
-  // reset to root
   await esc();
   await sleep(250);
   await focus();
 
-  // walk down to this row
   let cur = await state();
   let guard = 0;
   while (cur?.selected !== name && guard++ < 10) {
@@ -146,15 +139,12 @@ for (const name of internal) {
   ok(`"${name}" screen has content or is intentionally empty`, opened?.rows?.length >= 0);
 }
 
-// External rows: select Music and confirm the press actually navigates away.
-// These rows set window.location.href, so there is no anchor to inspect.
 const navs = [];
 ws.addEventListener("message", (e) => {
   const m = JSON.parse(e.data);
   if (m.method === "Page.frameNavigated" && m.params.frame.parentId === undefined) navs.push(m.params.frame.url);
 });
 
-// return to root, then to the top row
 await esc();
 await sleep(250);
 await focus();

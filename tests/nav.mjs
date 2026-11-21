@@ -1,5 +1,3 @@
-/* Navigation test: drives the wheel with real key events and asserts the screen stack.
-   Uses the same CDP plumbing as smoke.mjs. Run: node tests/nav.mjs */
 import { spawn } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -76,8 +74,6 @@ const up = () => key("ArrowUp", "ArrowUp", 38);
 const enter = () => key("Enter", "Enter", 13);
 const esc = () => key("Escape", "Escape", 27);
 
-/* The menu title is rendered inside the shadow root; this reads whichever row is selected
-   and the current screen title so we can assert the stack. */
 const state = () =>
   evaluate(`(() => {
     const r = document.querySelector('web-music-ipod').shadowRoot;
@@ -92,7 +88,6 @@ const state = () =>
 
 console.log(`\nnav: ${URL_}\n`);
 
-// focus the wheel so arrow keys are consumed by the component
 await evaluate(`(() => {
   const r = document.querySelector('web-music-ipod').shadowRoot;
   const w = r.querySelector('.scroll-wheel, [role="slider"], .wheel');
@@ -106,7 +101,6 @@ const s0 = await state();
 ok("starts on the root menu", s0.title === "iPod" || s0.rows.includes("Music"), JSON.stringify(s0));
 ok("root has 6 rows", ["Music", "Audiobooks", "Projects", "Apps", "About", "Settings"].every((x) => s0.rows.includes(x)), JSON.stringify(s0.rows));
 
-// row 1 = Music. Arrow down twice → Projects, enter → opens the Projects screen.
 const before = (await state()).selected;
 await down();
 await down();
@@ -124,11 +118,9 @@ await sleep(350);
 const back = await state();
 ok("Escape returns to the root menu", (back.title === "iPod") || back.rows.includes("Music"), JSON.stringify({ title: back.title }));
 
-// Apps screen
 const rowsNow = back.rows;
 ok("root restored after back", ["Music", "Audiobooks", "Projects", "Apps", "About", "Settings"].every((x) => rowsNow.includes(x)), JSON.stringify(rowsNow));
 
-// screenshot for the user
 const shot = await send("Page.captureScreenshot", { format: "png" }, S);
 writeFileSync(join(process.cwd(), "assets", "screenshot.png"), Buffer.from(shot.result.data, "base64"));
 console.log("  ..   wrote assets/screenshot.png");

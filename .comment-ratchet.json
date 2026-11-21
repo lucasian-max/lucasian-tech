@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "files": {
+    "includes/ipod/web-music-ipod.esm.js": 782,
+    "mockups/directions.html": 15,
+    "mockups/frame-a.html": 11,
+    "mockups/frame-b.html": 11,
+    "mockups/frame-c.html": 11,
+    "mockups/frame-d.html": 12,
+    "mockups/frame-mobile.html": 11
+  }
+}

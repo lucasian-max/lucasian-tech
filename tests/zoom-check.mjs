@@ -1,7 +1,3 @@
-/* Zoom check: the host element must be 440px wide so the component's own
-   `@container ipod (width < 360px)` rule leaves --ipod-scale at 1. At width 0
-   it self-scales to 0.75, which reads as the device "zooming in" after load.
-   No dependencies — CDP over WebSocket, same as smoke.mjs. */
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";

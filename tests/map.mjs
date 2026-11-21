@@ -1,5 +1,3 @@
-/* Maps every root row: what it opens, what it lists, and where it goes.
-   Run: node tests/map.mjs   (needs a static server on 8099) */
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
