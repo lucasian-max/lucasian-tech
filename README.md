@@ -2,13 +2,11 @@
 
 my personal site. it's a working 2004 iPod with my projects and 8 songs.
 
-![the iPod home screen](assets/screenshot.png)
+![the iPod home screen](assets/screenshot.jpg)
 
 [lucasian.tech](https://lucasian.tech)
 
 you can use a mouse, trackpad, keyboard, or finger. nothing to install.
-
-![Now Playing with All Along the Watchtower](assets/now-playing.png)
 
 ## what it does
 
@@ -19,6 +17,15 @@ you can use a mouse, trackpad, keyboard, or finger. nothing to install.
 - drag the chassis and it tilts. the highlight and scratches move with it
 - arrow keys, Enter, Escape, and Space also work
 - it fits a phone, and the song list scrolls with a finger
+
+## screenshots
+
+|  |  |
+| --- | --- |
+| ![projects](assets/projects.jpg) | ![about](assets/about.jpg) |
+| ![music](assets/songs.jpg) | ![now playing](assets/now-playing.jpg) |
+
+<img src="assets/phone.png" width="320" alt="the iPod on a phone">
 
 ## how i made it
 
