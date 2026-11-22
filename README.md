@@ -21,9 +21,8 @@ You can use the iPod scroll wheel and menu to navigate, or use a mouse and keybo
 |  |  |
 | --- | --- |
 | ![Projects](assets/projects.png) | ![About](assets/about.png) |
-| ![Music](assets/songs.png) | ![Now Playing](assets/now-playing.png) |
 
-<img src="assets/phone.png" width="320" alt="The iPod on a phone">
+![Now Playing](assets/now-playing.png)
 
 ## How I made it
 
