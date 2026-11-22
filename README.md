@@ -1,60 +1,78 @@
-<img src="assets/icon.svg" width="64" height="64" alt="">
-
 # lucasian.tech
 
-Personal site for Mridul Vijay ([lucasian.tech](https://lucasian.tech)), built as a working 2004 4th-generation iPod.
+my personal site. it's a working 2004 iPod with my projects and 8 songs.
 
-No build step, no runtime framework dependencies, no CMS. Static HTML, CSS, vanilla JS, a patched `<web-music-ipod>` custom element, and full-length MP3 audio served from Cloudflare Pages.
+![the iPod home screen](assets/screenshot.png)
 
-## Controls
+[lucasian.tech](https://lucasian.tech)
 
-- **LCD rows:** click to highlight, click again (or double-click) to open.
-- **Click wheel:** drag around the ring, scroll with a mouse/trackpad, tap `menu` / `>||` / `|<<` / `>>|`, or press the center button.
-- **Keyboard:** `ArrowUp` / `ArrowDown`, `Enter`, `Escape` / `Backspace`, `Space` (mute/unmute music).
-- **Inline remote (top right):** starts muted; click the speaker key to unmute and start playback, click the LCD readout to jump to `Now Playing`, or click `>>|` to skip.
-- **Chassis:** drag outside the wheel to tilt the iPod in 3D; specular highlight, handling wear, and floor shadow track the angle.
-- **Brick:** open `About → Brick`, hold the center button on `About`, or open `Projects → lucasian.tech → Play Brick`.
+you can use a mouse, trackpad, keyboard, or finger. nothing to install.
 
-## Layout
+![Now Playing with All Along the Watchtower](assets/now-playing.png)
 
-```
-index.html                  Page shell, metadata, inline remote, noscript fallback
-styles.css                  Studio backdrop, 3D chassis rig, inline remote styling
-app.js                      Site data (window.__SITE), LCD/wheel bridge, tilt, HUD
-includes/ipod/
-  web-music-ipod.esm.js     Patched <web-music-ipod> custom element
-  data/us/en-US.json        Track/artist catalog (mirrored to index.json)
-assets/audio/               Full-length 112 kbps MP3 tracks
-scripts/
-  sync-navidrome.mjs        Pulls tracks from Navidrome without exposing server credentials
-  lint-comments.mjs         Ratcheting comment linter (.comment-ratchet.json)
-tests/verify-v2.mjs         Headless Chromium CDP verification suite
-deploy.sh                   Content-hashes shell assets (?v=...) and deploys to Cloudflare Pages
-```
+## what it does
 
-## Local dev
+- music, projects, about, and contacts, on the wheel and on the LCD rows
+- 8 full songs from my library, not 30 second previews
+- pause and skip from the inline remote in the corner
+- press Music while a song is playing and it opens Now Playing
+- drag the chassis and it tilts. the highlight and scratches move with it
+- arrow keys, Enter, Escape, and Space also work
+- it fits a phone, and the song list scrolls with a finger
 
-Any static file server works:
+## how i made it
+
+the site is plain HTML, CSS, and JavaScript. no build step, no framework.
+
+the iPod is `web-music-ipod`, a custom element I patched. I replaced its catalog with `window.__SITE` in `app.js`, wired the LCD rows and wheel to a small bridge, and made Now Playing and the remote share one playback state.
+
+the first version used 30 second iTunes previews. those URLs kept dying. the songs now come from my Navidrome library, converted to 112 kbps MP3 and committed in `assets/audio/`. the catalog is `includes/ipod/data/us/en-US.json`.
+
+on a phone I drop the 3D tilt, the blur, and the noise. the catalog preloads and the song list pans with a finger.
+
+`deploy.sh` hashes `app.js`, `styles.css`, and the player, stamps the hash into `index.html`, and pushes the folder to Cloudflare Pages. that keeps the edge cache from serving an old player.
+
+## run it locally
+
+python is enough.
 
 ```sh
+git clone https://github.com/lucasian-max/lucasian-tech.git
+cd lucasian-tech
 python3 -m http.server 8123 --bind 127.0.0.1
 ```
 
-Open `http://127.0.0.1:8123/`.
+open `http://127.0.0.1:8123/`.
 
-## Verification & lint
+node 20 or newer is only for the tests and the deploy script.
 
-```sh
-node tests/verify-v2.mjs
-node scripts/lint-comments.mjs
-```
+## tests
 
-`tests/verify-v2.mjs` launches headless Chromium over CDP with zero npm dependencies and checks root navigation, direct LCD clicks, full-length audio playback, mobile bounds, and console/page errors.
-
-## Deploy
+three headless Chromium test scripts. no npm packages.
 
 ```sh
-./deploy.sh
+node tests/verify.mjs
+node tests/music.mjs
+node tests/mobile.mjs
 ```
 
-`deploy.sh` computes an 8-character SHA-256 stamp from `app.js`, `styles.css`, and `includes/ipod/web-music-ipod.esm.js`, rewrites `?v=...` in a temporary build directory so Cloudflare's edge cache busts cleanly, verifies required assets exist, and deploys via `wrangler pages deploy`.
+`verify.mjs` checks the menu, LCD clicks, full songs, and the phone layout. `music.mjs` covers the remote, pause and resume, skipping, the Music row, Now Playing, touch taps, and the end of the queue. `mobile.mjs` checks phone width, scale, remote bounds, the touch hint, and that the tilt is off.
+
+`music.mjs` can hang when audio starts on some machines. `mobile.mjs` is the quick check I trust.
+
+## built with
+
+- vanilla JavaScript, HTML, and CSS
+- the `web-music-ipod` custom element, patched for this site
+- HTML5 audio
+- Cloudflare Pages and Wrangler
+- Navidrome and `ffmpeg` for the music
+- headless Chromium and the Chrome DevTools Protocol for tests
+
+## ai disclosure
+
+AI helped with parts of the player wiring, the tests, and the first draft of this README. the design, the music library, and the final edit are mine.
+
+## credits
+
+thanks to the people behind `web-music-ipod`, and to the artists whose music is here.

@@ -1,5 +1,3 @@
-probe-slow.html
-zz-*
-.opencode/opencode-loop/
 .wrangler/
 .opencode/
+tests/shots/

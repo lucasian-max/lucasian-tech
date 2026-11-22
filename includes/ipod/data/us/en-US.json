@@ -4,13 +4,6 @@
   "language": "en-US",
   "songs": [
     {
-      "id": "dear-prudence",
-      "name": "Dear Prudence",
-      "artistName": "The Beatles",
-      "albumName": "The Beatles (White Album)",
-      "previewUrl": "/assets/audio/dear-prudence.mp3"
-    },
-    {
       "id": "gypsy",
       "name": "Gypsy",
       "artistName": "Fleetwood Mac",
@@ -58,6 +51,13 @@
       "artistName": "Deftones",
       "albumName": "White Pony",
       "previewUrl": "/assets/audio/change.mp3"
+    },
+    {
+      "id": "all-along-the-watchtower",
+      "name": "All Along the Watchtower",
+      "artistName": "Jimi Hendrix",
+      "albumName": "Experience Hendrix: The Best of Jimi Hendrix",
+      "previewUrl": "/assets/audio/all-along-the-watchtower.mp3"
     }
   ],
   "artists": [
@@ -85,18 +85,18 @@
       ]
     },
     {
+      "id": "artist-jimi-hendrix",
+      "name": "Jimi Hendrix",
+      "songIds": [
+        "all-along-the-watchtower"
+      ]
+    },
+    {
       "id": "artist-radiohead",
       "name": "Radiohead",
       "songIds": [
         "no-surprises",
         "karma-police"
-      ]
-    },
-    {
-      "id": "artist-the-beatles",
-      "name": "The Beatles",
-      "songIds": [
-        "dear-prudence"
       ]
     }
   ],
@@ -105,14 +105,14 @@
       "id": "pl-favorites",
       "name": "On Repeat",
       "songIds": [
-        "dear-prudence",
         "gypsy",
         "no-surprises",
         "the-chain",
         "karma-police",
         "dreams",
         "veridis-quo",
-        "change"
+        "change",
+        "all-along-the-watchtower"
       ]
     }
   ]

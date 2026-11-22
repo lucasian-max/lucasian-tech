@@ -4,8 +4,7 @@ window.__SITE = {
       slug: "black-hole",
       title: "Black Hole",
       facts: [
-        { title: "What", value: "pixel black hole" },
-        { title: "Built", value: "canvas · shader" }
+        { title: "What", value: "pixel black hole" }
       ],
       links: [
         { title: "Launch demo", url: "https://iammridul.me/blackhole-pixel/blackhole-pixel.html", value: "live" },
@@ -13,48 +12,23 @@ window.__SITE = {
       ]
     },
     {
-      slug: "handwritten2pdf",
-      title: "handwritten2pdf",
-      facts: [
-        { title: "What", value: "notes to LaTeX" },
-        { title: "Built", value: "AI · PDF" }
-      ],
-      links: [
-        { title: "Source", url: "https://github.com/lucasian-max/handwritten2pdf", value: "GitHub" }
-      ]
-    },
-    {
-      slug: "study-log",
-      title: "Study log",
-      facts: [
-        { title: "What", value: "sheets dashboard" },
-        { title: "Built", value: "zero backend" }
-      ],
-      links: [
-        { title: "Open app", url: "https://study.iammridul.me", value: "live" }
-      ]
-    },
-    {
       slug: "spotify-display",
       title: "Spotify Display",
       facts: [
-        { title: "What", value: "now-playing desk" },
-        { title: "Built", value: "Spotify API" }
+        { title: "What", value: "now playing" }
       ],
       links: [
         { title: "Source", url: "https://github.com/lucasian-max/Spotify-Display", value: "GitHub" }
       ]
     },
     {
-      slug: "colophon",
+      slug: "lucasian-tech",
       title: "lucasian.tech",
       facts: [
-        { title: "Shell", value: "2004 iPod 4G" },
-        { title: "Audio", value: "Web Audio API" },
-        { title: "Easter egg", value: "Brick game" }
+        { title: "What", value: "this website" }
       ],
       links: [
-        { title: "Play Brick", target: "brick" },
+        { title: "About this site", target: "about" },
         { title: "Source", url: "https://github.com/lucasian-max/lucasian-tech", value: "GitHub" }
       ]
     }
@@ -63,9 +37,8 @@ window.__SITE = {
   about: {
     name: "Mridul Vijay",
     facts: [
-      { title: "Makes", value: "web, tools" },
       { title: "Into", value: "rockets, AI" },
-      { title: "From", value: "NSW · 16" },
+      { title: "From", value: "NSW" },
       { title: "Learning", value: "Rust" }
     ],
     links: [],
@@ -74,8 +47,7 @@ window.__SITE = {
 
   contacts: [
     { title: "Email", url: "mailto:hey@lucasian.tech", value: "hey@" },
-    { title: "GitHub", url: "https://github.com/lucasian-max", value: "lucasian-max" },
-    { title: "Website", url: "https://iammridul.me", value: "iammridul.me" }
+    { title: "GitHub", url: "https://github.com/lucasian-max", value: "lucasian-max" }
   ]
 };
 
@@ -154,9 +126,11 @@ window.__SITE = {
         ".select-button:hover { box-shadow: 0 0 1px 1px #8c8c8c; }",
         ".menu-items:focus-visible { outline: 2px solid #484647 !important; outline-offset: -1px; }",
         ".menu-item.selected:focus-visible { outline: none !important; }",
-        ".menu-item .item-value { margin-left: auto; padding-left: 8px; }",
+        ".menu-item .item-value { margin-left: auto; padding-left: 8px; min-width: 0; max-width: 80%; overflow: hidden; text-overflow: ellipsis; }",
         ".menu-item[data-action=link] .item-value { visibility: hidden; }",
-        ".menu-item[data-action=link].selected .item-value { visibility: visible; }"
+        ".menu-item[data-action=link].selected .item-value { visibility: visible; }",
+        ".menu-item, .wheel-button, .select-button { -webkit-tap-highlight-color: transparent; }",
+        ".menu-items { touch-action: pan-y !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }"
       ].join("\n");
       root.appendChild(fix);
 
@@ -196,7 +170,8 @@ window.__SITE = {
 
         quietHint();
         var screen = window.__IPOD_BRIDGE.getScreen();
-        if (screen && screen.getSelectedIndex() === idx) {
+        var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+        if (coarse || (screen && screen.getSelectedIndex() === idx)) {
           window.__IPOD_BRIDGE.activateIndex(idx);
         } else {
           window.__IPOD_BRIDGE.selectIndex(idx);
@@ -323,7 +298,7 @@ window.__SITE = {
       window.__IPOD_BRIDGE.openScreen("project-detail", ctx);
     } else if (key === "music") {
       window.__IPOD_BRIDGE.openScreen("songs");
-    } else if (["songs", "projects", "about", "contacts", "brick"].indexOf(key) >= 0) {
+    } else if (["songs", "projects", "about", "contacts"].indexOf(key) >= 0) {
       window.__IPOD_BRIDGE.openScreen(key);
     }
   }
@@ -448,6 +423,38 @@ window.__SITE = {
 })();
 
 (function () {
+  var set = document.getElementById("ipod-set");
+  if (!set) return;
+  var frame = 0;
+
+  function fit() {
+    var vv = window.visualViewport;
+    var w = vv ? vv.width : window.innerWidth;
+    var h = vv ? vv.height : window.innerHeight;
+    var short = h < 480;
+    var topBudget = short && w >= 600 ? 48 : (w < 900 ? 120 : 130);
+    var scale = Math.min((w - 12) / 440, (h - topBudget) / 692, 1.8);
+    if (!isFinite(scale) || scale < 0.35) scale = 0.35;
+    document.documentElement.style.setProperty("--app-height", h + "px");
+    document.documentElement.classList.toggle("is-short", short);
+    set.style.setProperty("--set-scale", scale.toFixed(3));
+  }
+
+  function queue() {
+    if (frame) cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(fit);
+  }
+
+  fit();
+  window.addEventListener("resize", queue);
+  window.addEventListener("orientationchange", queue);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", queue);
+    window.visualViewport.addEventListener("scroll", queue);
+  }
+})();
+
+(function () {
   function initHud() {
     var pill = document.getElementById("music-pill");
     var btnToggle = document.getElementById("music-toggle");
@@ -456,6 +463,11 @@ window.__SITE = {
     var titleEl = document.getElementById("music-title");
     var artistEl = document.getElementById("music-artist");
     var hintEl = document.getElementById("studio-hint");
+
+    var touchHint = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) || window.innerWidth <= 640;
+    if (hintEl && touchHint) {
+      hintEl.textContent = "Tap a row, or spin the wheel";
+    }
 
     function markInteracted() {
       if (hintEl) hintEl.classList.add("is-quiet");
@@ -482,17 +494,24 @@ window.__SITE = {
       });
     }
 
-    window.addEventListener("ipod:playback", function (e) {
-      var d = e.detail || {};
+    if (pill) {
+      pill.addEventListener("click", function (e) {
+        if (e.target && e.target.closest && e.target.closest(".remote-key")) return;
+        markInteracted();
+        if (window.__IPOD_BRIDGE) window.__IPOD_BRIDGE.openNowPlaying();
+      });
+    }
+
+    function applyPlayback(d) {
       var playing = !!d.isPlaying;
-      var loaded = !!d.hasLoadedItem || !!d.isLoading;
+      var loaded = !!d.hasLoadedItem;
       document.documentElement.setAttribute("data-playing", playing ? "true" : "false");
       if (pill) {
         pill.setAttribute("data-playing", playing ? "true" : "false");
         pill.setAttribute("data-loaded", loaded ? "true" : "false");
       }
       if (btnToggle) {
-        btnToggle.setAttribute("aria-label", playing ? "Mute music" : "Unmute and play music");
+        btnToggle.setAttribute("aria-label", playing ? "Pause music" : "Play music");
         btnToggle.setAttribute("aria-pressed", playing ? "true" : "false");
       }
       if (btnNext) {
@@ -501,23 +520,28 @@ window.__SITE = {
       if (d.track && titleEl && artistEl) {
         if (playing) {
           titleEl.textContent = d.track.name || "Playing";
-          artistEl.textContent = d.track.artistName || "";
         } else {
-          titleEl.textContent = "Muted";
-          artistEl.textContent = d.track.name || "Dear Prudence";
+          titleEl.textContent = "Paused";
         }
+        artistEl.textContent = d.track.artistName || d.track.name || "";
       } else if (titleEl && artistEl) {
         titleEl.textContent = "Sound Off";
-        artistEl.textContent = "Dear Prudence";
+        artistEl.textContent = "Gypsy";
       }
+    }
+
+    window.addEventListener("ipod:playback", function (e) {
+      applyPlayback(e.detail || {});
     });
+    applyPlayback({ isPlaying: false, hasLoadedItem: false, isLoading: false, queueLength: 0, track: null });
 
     document.addEventListener("keydown", function (e) {
       var host = document.getElementById("ipod");
       if (!host || !host.shadowRoot) return;
 
       var active = document.activeElement;
-      if (active && active !== document.body && active !== host && active.closest && active.closest(".studio-hud")) {
+      var inHud = active && active !== document.body && active !== host && active.closest && active.closest(".studio-hud");
+      if (inHud && (e.key === " " || e.key === "Enter")) {
         return;
       }
 

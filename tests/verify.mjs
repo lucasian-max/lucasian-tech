@@ -53,7 +53,7 @@ const ok = (name, cond, detail = "") => {
     console.log(`  ok   ${name}`);
   } else {
     fail++;
-    console.log(`  FAIL ${name}${detail ? " — " + detail : ""}`);
+    console.log(`  FAIL ${name}${detail ? " - " + detail : ""}`);
   }
 };
 
@@ -65,6 +65,7 @@ const chrome = spawn(
     "--headless=new",
     "--no-sandbox",
     "--disable-gpu",
+    "--disable-dev-shm-usage",
     "--autoplay-policy=no-user-gesture-required",
     "--window-size=1440,900",
     "about:blank",
@@ -134,11 +135,19 @@ const evalJs = async (expr) => {
 };
 
 async function shot(filename) {
-  const r = await send("Page.captureScreenshot", { format: "png" }, S);
+  if (process.env.SKIP_SHOTS === "1") return;
+  const r = await Promise.race([
+    send("Page.captureScreenshot", { format: "png" }, S),
+    sleep(5000).then(() => ({ timeout: true })),
+  ]);
+  if (r.timeout) {
+    console.log(`  ..   screenshot skipped: ${filename}`);
+    return;
+  }
   writeFileSync(join(SHOT_DIR, filename), Buffer.from(r.result.data, "base64"));
 }
 
-console.log("\nverify-v3: http://127.0.0.1:" + HTTP_PORT + "/\n");
+console.log("\nverify: http://127.0.0.1:" + HTTP_PORT + "/\n");
 
 const rootState = await evalJs(`(() => {
   const el = document.getElementById('ipod');
@@ -155,11 +164,11 @@ const rootState = await evalJs(`(() => {
   return { title, items, hasNotes, hasBrand, pillTitle, backlit, leak };
 })()`);
 
-ok("root title is Mridul Vijay", rootState.title === "Mridul Vijay", JSON.stringify(rootState));
-ok("root menu has 4 rows (Music, Projects, About, Contacts)", JSON.stringify(rootState.items) === JSON.stringify(["Music", "Projects", "About", "Contacts"]), JSON.stringify(rootState.items));
-ok("Notes and top-left brand badge completely removed", !rootState.hasNotes && !rootState.hasBrand, JSON.stringify(rootState));
-ok("inline remote starts muted by default (Sound Off)", rootState.pillTitle === "Sound Off", rootState.pillTitle);
-ok("iPod backlit locked true with zero ambient/self-hosted leaks", rootState.backlit === "true" && !rootState.leak, JSON.stringify(rootState));
+ok("title says Mridul Vijay", rootState.title === "Mridul Vijay", JSON.stringify(rootState));
+ok("menu is Music, Projects, About, Contacts", JSON.stringify(rootState.items) === JSON.stringify(["Music", "Projects", "About", "Contacts"]), JSON.stringify(rootState.items));
+ok("no Notes row or brand badge", !rootState.hasNotes && !rootState.hasBrand, JSON.stringify(rootState));
+ok("remote starts on Sound Off", rootState.pillTitle === "Sound Off", rootState.pillTitle);
+ok("backlit is on and no old service names leak", rootState.backlit === "true" && !rootState.leak, JSON.stringify(rootState));
 
 await shot("v3-desktop-home.png");
 
@@ -179,7 +188,7 @@ const musicScreen = await evalJs(`(() => {
     hash: location.hash
   };
 })()`);
-ok("Music goes straight into Songs (Dear Prudence, Gypsy, No Surprises...)", musicScreen.title === "Music" && musicScreen.items[0] === "Dear Prudence" && musicScreen.items.length === 8, JSON.stringify(musicScreen));
+ok("Music opens the song list", musicScreen.title === "Music" && musicScreen.items[0] === "Gypsy" && musicScreen.items.length === 8, JSON.stringify(musicScreen));
 
 await shot("v3-desktop-songs.png");
 
@@ -198,7 +207,7 @@ const playingState = await evalJs(`(() => {
     queueLen: pb?.queue?.length || 0
   };
 })()`);
-ok("inline remote unmutes and plays full-length Dear Prudence (> 180s)", playingState.pillPlaying === "true" && playingState.title === "Dear Prudence" && playingState.artist === "The Beatles" && playingState.duration > 180, JSON.stringify(playingState));
+ok("remote plays all of Gypsy, over 3 minutes", playingState.pillPlaying === "true" && playingState.title === "Gypsy" && playingState.artist === "Fleetwood Mac" && playingState.duration > 180, JSON.stringify(playingState));
 
 await evalJs(`document.getElementById('music-track').click()`);
 await sleep(360);
@@ -212,10 +221,10 @@ const mobileBounds = await evalJs(`(() => {
   const rig = document.getElementById('chassis-rig').getBoundingClientRect();
   return { left: Math.round(rig.left), right: Math.round(rig.right), vw: window.innerWidth };
 })()`);
-ok("mobile layout fits cleanly without horizontal overflow", mobileBounds.left >= 0 && mobileBounds.right <= mobileBounds.vw + 2, JSON.stringify(mobileBounds));
+ok("phone layout fits without sideways scroll", mobileBounds.left >= 0 && mobileBounds.right <= mobileBounds.vw + 2, JSON.stringify(mobileBounds));
 await shot("v3-mobile-home.png");
 
-ok("zero console or page errors", consoleErrors.length === 0 && pageErrors.length === 0, JSON.stringify({ consoleErrors, pageErrors }));
+ok("no console or page errors", consoleErrors.length === 0 && pageErrors.length === 0, JSON.stringify({ consoleErrors, pageErrors }));
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
 ws.close();

@@ -15,6 +15,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/favicon-180.png">
 
   <link rel="modulepreload" href="includes/ipod/web-music-ipod.esm.js?v=v3">
+  <link rel="preload" as="fetch" href="includes/ipod/data/us/en-US.json">
   <link rel="stylesheet" href="styles.css?v=v3">
 
   <meta property="og:title" content="Mridul Vijay">
@@ -49,17 +50,13 @@
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Black Hole",
         "url": "https://iammridul.me/blackhole-pixel/blackhole-pixel.html" },
-      { "@type": "ListItem", "position": 2, "name": "handwritten2pdf",
-        "url": "https://github.com/lucasian-max/handwritten2pdf" },
-      { "@type": "ListItem", "position": 3, "name": "Study log",
-        "url": "https://study.iammridul.me" },
-      { "@type": "ListItem", "position": 4, "name": "Spotify Display",
+      { "@type": "ListItem", "position": 2, "name": "Spotify Display",
         "url": "https://github.com/lucasian-max/Spotify-Display" }
     ]
   }
   </script>
 
-  <script src="app.js?v=v3"></script>
+  <script src="app.js?v=v3" defer></script>
   <script type="module" src="includes/ipod/web-music-ipod.esm.js?v=v3"></script>
 </head>
 <body>
@@ -84,7 +81,7 @@
       <button type="button" class="remote-lcd" id="music-track" title="Open Now Playing on iPod">
         <span class="lcd-eq" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="lcd-title" id="music-title">Sound Off</span>
-        <span class="lcd-artist" id="music-artist">Dear Prudence</span>
+        <span class="lcd-artist" id="music-artist">Gypsy</span>
       </button>
 
       <button type="button" class="remote-key remote-next" id="music-next" aria-label="Next song" title="Next song" hidden>
@@ -117,8 +114,6 @@
     <h3>Projects</h3>
     <ul>
       <li><a href="https://iammridul.me/blackhole-pixel/blackhole-pixel.html">Black Hole</a> — a pixel-art black hole you can fall into.</li>
-      <li><a href="https://github.com/lucasian-max/handwritten2pdf">handwritten2pdf</a> — turn photos of handwritten notes into compiled LaTeX/PDF.</li>
-      <li><a href="https://study.iammridul.me">Study log</a> — minimal dashboard backed by Google Sheets.</li>
       <li><a href="https://github.com/lucasian-max/Spotify-Display">Spotify Display</a> — live currently-playing display.</li>
     </ul>
     <h3>Contact</h3>
@@ -131,8 +126,6 @@
     <p class="fb-title">Mridul Vijay</p>
     <ul>
       <li><a href="https://iammridul.me/blackhole-pixel/blackhole-pixel.html">Black Hole</a></li>
-      <li><a href="https://github.com/lucasian-max/handwritten2pdf">handwritten2pdf</a></li>
-      <li><a href="https://study.iammridul.me">Study log</a></li>
       <li><a href="https://github.com/lucasian-max/Spotify-Display">Spotify Display</a></li>
       <li><a href="https://github.com/lucasian-max">GitHub</a></li>
       <li><a href="mailto:hey@lucasian.tech">hey@lucasian.tech</a></li>

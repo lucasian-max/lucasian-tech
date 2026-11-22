@@ -4289,9 +4289,7 @@ function _h({ i18n: e }) {
 }
 function Ch({ data: e, i18n: t }) {
   var A = (window.__SITE && window.__SITE.about) || {};
-  var rows = [
-    { id: "me", title: A.name || "Mridul Vijay", action: "info", centered: !0 }
-  ];
+  var rows = [];
   (A.facts || []).forEach(function (f, i) {
     if (!f || !f.title) return;
     rows.push({
@@ -4311,12 +4309,6 @@ function Ch({ data: e, i18n: t }) {
     title: t.t("ASE.Web.IPod.About.Version"),
     action: "info",
     value: D.version || "2644.2.0"
-  });
-  rows.push({
-    id: "about-brick",
-    title: t.t("ASE.Web.IPod.Game.Title"),
-    action: "navigate",
-    target: "brick"
   });
   return rows;
 }
@@ -4377,6 +4369,14 @@ function ProjectsList() {
   });
   if (!list.length) return [{ id: "empty", title: "Nothing yet", action: "info", centered: !0 }];
   return list.map(function (p) {
+    if (p.target) {
+      return {
+        id: "s-" + p.title,
+        title: p.title,
+        action: "navigate",
+        target: p.target
+      };
+    }
     if (p.slug) {
       return {
         id: "proj-" + p.slug,
@@ -4430,8 +4430,8 @@ const gn = {
   about: {
     view: "list",
     titleKey: "ASE.Web.IPod.Settings.About",
-    items: Ch,
-    selectHold: { ms: Is, target: "brick" }
+    title: () => (window.__SITE && window.__SITE.about && window.__SITE.about.name) || "About",
+    items: Ch
   },
   backlight: {
     view: "list",
@@ -4493,11 +4493,6 @@ const gn = {
       return p ? p.title : "Project";
     },
     items: ProjectDetail
-  },
-  brick: {
-    view: "brick",
-    titleKey: "ASE.Web.IPod.Game.Title",
-    blocksIdleJump: !0
   }
 };
 function pe(e) {
@@ -5174,7 +5169,7 @@ function Fh(e, t, i) {
   function be(b) {
     St == null || St.steerPaddle(b ?? 0);
   }
-  const Yt = Il(ps, () => Ft(rl(), !0));
+  const Yt = Il(ps, () => {});
   function Me() {
     c && Yt.start();
   }
@@ -5245,7 +5240,7 @@ function Fh(e, t, i) {
       }
       if (!A.hasLoadedItem)
         return;
-      _.toggle();
+      A.isPlaying ? k.pause() : k.resume();
       return;
     }
     const b = h[Q];
@@ -5256,6 +5251,10 @@ function Fh(e, t, i) {
           else window.open(b.url, "_blank", "noopener,noreferrer");
           break;
         case "navigate":
+          if (b.id === "music" && b.target === "songs" && A.queue.length > 0) {
+            Ft(rl());
+            break;
+          }
           Ft({
             key: b.target,
             contextId: b.contextId,
@@ -5370,7 +5369,10 @@ function Fh(e, t, i) {
     openNowPlaying: () => {
       if (n === "now-playing") return !0;
       if (A.queue.length > 0 || A.hasLoadedItem) { Ft(rl()); return !0; }
-      return startDefaultSongs(!0);
+      if (n === "songs") return !0;
+      while (q.length > 1) Gt();
+      Ft({ key: "songs" });
+      return !0;
     },
     playAmbient: (openNP = !1) => startDefaultSongs(openNP),
     playDefault: (openNP = !1) => startDefaultSongs(openNP),
@@ -7790,6 +7792,7 @@ function i1(e, t, i) {
           g.isPlaying ? k.pause() : k.resume();
           return !0;
         }
+        if (g.isLoading) return !1;
         return !!(window.__IPOD_SCREEN && window.__IPOD_SCREEN.playAmbient(!1));
       },
       openNowPlaying: () => {
