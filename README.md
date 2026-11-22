@@ -2,7 +2,7 @@
 
 my personal site. it's a working 2004 iPod with my projects and 8 songs.
 
-![the iPod home screen](assets/screenshot.jpg)
+![the iPod home screen](assets/screenshot.png)
 
 [lucasian.tech](https://lucasian.tech)
 
@@ -22,8 +22,8 @@ you can use a mouse, trackpad, keyboard, or finger. nothing to install.
 
 |  |  |
 | --- | --- |
-| ![projects](assets/projects.jpg) | ![about](assets/about.jpg) |
-| ![music](assets/songs.jpg) | ![now playing](assets/now-playing.jpg) |
+| ![projects](assets/projects.png) | ![about](assets/about.png) |
+| ![music](assets/songs.png) | ![now playing](assets/now-playing.png) |
 
 <img src="assets/phone.png" width="320" alt="the iPod on a phone">
 
