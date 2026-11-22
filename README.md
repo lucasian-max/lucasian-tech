@@ -2,7 +2,7 @@
 
 My personal site that looks like an iPod.
 
-![the iPod home screen](assets/screenshot.png)
+![The iPod home screen](assets/screenshot.png)
 
 [lucasian.tech](https://lucasian.tech)
 
@@ -14,20 +14,20 @@ You can use the iPod scroll wheel and menu to navigate, or use a mouse and keybo
 - 8 songs from my library
 - pause and skip from the menu
 - the iPod can slightly tilt
-- arrow keys, Enter, Escape, and Space also work
+- arrow keys, `Enter`, `Escape`, and `Space` also work
 
 ## Screenshots
 
 |  |  |
 | --- | --- |
-| ![projects](assets/projects.png) | ![about](assets/about.png) |
-| ![music](assets/songs.png) | ![now playing](assets/now-playing.png) |
+| ![Projects](assets/projects.png) | ![About](assets/about.png) |
+| ![Music](assets/songs.png) | ![Now Playing](assets/now-playing.png) |
 
-<img src="assets/phone.png" width="320" alt="the iPod on a phone">
+<img src="assets/phone.png" width="320" alt="The iPod on a phone">
 
 ## How I made it
 
-the site is plain HTML, CSS, and JavaScript. The iPod is `web-music-ipod`, a custom element where I replaced its catalog with music, projects, about, and contacts.
+The site is plain HTML, CSS, and JavaScript. The iPod is `web-music-ipod`, a custom element where I replaced its catalog with music, projects, about, and contacts.
 
 Making it responsive and work on phones took a lot of effort, as the iPod kept loading out of frame. I had to recalculate how the viewport changes and test edge cases.
 
